@@ -1,7 +1,8 @@
 package org.exoplatform.sample.webui.component;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.Map;
 
 import org.exoplatform.download.DownloadResource;
 import org.exoplatform.download.DownloadService;
-import org.exoplatform.download.InputStreamDownloadResource;
+import org.exoplatform.download.FileDownloadResource;
 import org.exoplatform.upload.UploadResource;
 import org.exoplatform.upload.UploadService.UploadUnit;
 import org.exoplatform.webui.config.annotation.ComponentConfig;
@@ -20,8 +21,9 @@ import org.exoplatform.webui.event.EventListener;
 import org.exoplatform.webui.form.UIForm;
 import org.exoplatform.webui.form.UIFormUploadInput;
 import org.exoplatform.webui.form.input.UIUploadInput;
+import org.gatein.common.io.IOTools;
 
-@ComponentConfig(lifecycle = UIFormLifecycle.class, template = "app:/groovy/webui/component/UISampleDownloadUpload.gtmpl", events = { @EventConfig(listeners = UISampleDownloadUpload.SubmitActionListener.class) })
+@ComponentConfig(lifecycle = UIFormLifecycle.class, template = "app:/groovy/webui/component/UISampleDownloadUpload.gtmpl", events = {@EventConfig(listeners = UISampleDownloadUpload.SubmitActionListener.class)})
 public class UISampleDownloadUpload extends UIForm {
 
     Map<String, String> data = new HashMap<String, String>();
@@ -32,7 +34,7 @@ public class UISampleDownloadUpload extends UIForm {
 
     private String[] inputName;
 
-    public UISampleDownloadUpload() {
+    public UISampleDownloadUpload() throws Exception {
         addUIFormInput(new UIFormUploadInput("name0", "value0"));
         addUIFormInput(new UIFormUploadInput("name1", "value1", 1));
         addUIFormInput(new UIFormUploadInput("name2", "value2", 200));
@@ -73,11 +75,23 @@ public class UISampleDownloadUpload extends UIForm {
             List<String> fileName = new ArrayList<String>();
             List<String> inputName = new ArrayList<String>();
             for (int index = 0; index <= 2; index++) {
-                UIFormUploadInput input = uiForm.getChildById("name" + index);
+                final UIFormUploadInput input = uiForm.getChildById("name" + index);
                 UploadResource uploadResource = input.getUploadResource();
                 if (uploadResource != null) {
-                    DownloadResource dresource = new InputStreamDownloadResource(input.getUploadDataAsStream(),
-                            uploadResource.getMimeType());
+                    DownloadResource dresource =
+                            new DownloadResource(uploadResource.getMimeType()) {
+                                @Override
+                                public void write(OutputStream out) throws IOException {
+                                    InputStream in = null;
+                                    try {
+                                        in = input.getUploadDataAsStream();
+                                        IOTools.copy(in, out);
+                                    } catch (Exception ex) {
+                                    } finally {
+                                        IOTools.safeClose(in);
+                                    }
+                                }
+                            };
                     dresource.setDownloadName(uploadResource.getFileName());
                     downloadLink.add(dservice.getDownloadLink(dservice.addDownloadResource(dresource)));
                     fileName.add(uploadResource.getFileName());
@@ -89,8 +103,7 @@ public class UISampleDownloadUpload extends UIForm {
                 UIUploadInput input = uiForm.getChildById("name" + index);
                 UploadResource[] uploadResources = input.getUploadResources();
                 for (UploadResource uploadResource : uploadResources) {
-                    DownloadResource dresource = new InputStreamDownloadResource(new FileInputStream(new File(
-                            uploadResource.getStoreLocation())), uploadResource.getMimeType());
+                    DownloadResource dresource = new FileDownloadResource(uploadResource.getStoreLocation(), uploadResource.getMimeType());
                     dresource.setDownloadName(uploadResource.getFileName());
                     downloadLink.add(dservice.getDownloadLink(dservice.addDownloadResource(dresource)));
                     fileName.add(uploadResource.getFileName());

@@ -19,13 +19,6 @@
 
 package org.exoplatform.web.handler;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URLEncoder;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.exoplatform.container.ExoContainer;
 import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.download.DownloadResource;
@@ -33,15 +26,19 @@ import org.exoplatform.download.DownloadService;
 import org.exoplatform.web.ControllerContext;
 import org.exoplatform.web.WebAppController;
 import org.exoplatform.web.WebRequestHandler;
-import org.gatein.common.logging.Logger;
-import org.gatein.common.logging.LoggerFactory;
+
+import java.net.URLEncoder;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
- * Created by The eXo Platform SARL Author : LeBienThuy thuy.le@exoplatform.com Dec 9, 2006
+ * Created by The eXo Platform SARL
+ * Author : LeBienThuy
+ * thuy.le@exoplatform.com
+ * Dec 9, 2006
  */
 public class DownloadHandler extends WebRequestHandler {
-
-    private final Logger log = LoggerFactory.getLogger(DownloadHandler.class);
 
     public String getHandlerName() {
         return "download";
@@ -67,38 +64,19 @@ public class DownloadHandler extends WebRequestHandler {
         String userAgent = req.getHeader("User-Agent");
         if (dresource.getDownloadName() != null) {
             if (userAgent != null && userAgent.contains("Firefox")) {
-                res.setHeader("Content-Disposition",
-                        "attachment; filename*=utf-8''" + URLEncoder.encode(dresource.getDownloadName(), "UTF-8") + "");
+                res.setHeader("Content-Disposition", "attachment; filename*=utf-8''"
+                        + URLEncoder.encode(dresource.getDownloadName(), "UTF-8") + "");
             } else {
-                res.setHeader("Content-Disposition",
-                        "attachment;filename=\"" + URLEncoder.encode(dresource.getDownloadName(), "UTF-8") + "\"");
+                res.setHeader("Content-Disposition", "attachment;filename=\""
+                        + URLEncoder.encode(dresource.getDownloadName(), "UTF-8") + "\"");
             }
         }
         res.setContentType(dresource.getResourceMimeType());
-        InputStream is = dresource.getInputStream();
-        try {
-            optimalRead(is, res.getOutputStream());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        } finally {
-            is.close();
-        }
+        dresource.write(res.getOutputStream());
     }
 
     @Override
     protected boolean getRequiresLifeCycle() {
         return false;
-    }
-
-    private static void optimalRead(InputStream is, OutputStream os) throws Exception {
-        int bufferLength = 1024; // TODO: Better to compute bufferLength in term of -Xms, -Xmx properties
-        int readLength = 0;
-        while (readLength > -1) {
-            byte[] chunk = new byte[bufferLength];
-            readLength = is.read(chunk);
-            if (readLength > 0) {
-                os.write(chunk, 0, readLength);
-            }
-        }
     }
 }

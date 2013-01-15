@@ -20,11 +20,13 @@
 package org.exoplatform.download;
 
 import java.io.IOException;
-import java.io.InputStream;
-
+import java.io.OutputStream;
 
 /**
- * Created by The eXo Platform SARL Author : Tuan Nguyen tuan08@users.sourceforge.net Dec 26, 2005
+ * Created by The eXo Platform SARL
+ * Author : Tuan Nguyen
+ * tuan08@users.sourceforge.net
+ * Dec 26, 2005
  */
 public abstract class DownloadResource {
 
@@ -39,6 +41,11 @@ public abstract class DownloadResource {
     private int limit_;
 
     private int accessCounter_;
+
+    /**
+     * A flag determining if the download resource could be reused multiple times
+     */
+    private boolean repeatable = false;
 
     public DownloadResource(String resourceMimeType) {
         this(null, resourceMimeType);
@@ -89,6 +96,13 @@ public abstract class DownloadResource {
         accessCounter_ = c;
     }
 
-    public abstract InputStream getInputStream() throws IOException;
+    public boolean isRepeatable() {
+        return repeatable;
+    }
 
+    public void setRepeatable(boolean b) {
+        repeatable = b;
+    }
+
+    public abstract void write(OutputStream out) throws IOException;
 }
