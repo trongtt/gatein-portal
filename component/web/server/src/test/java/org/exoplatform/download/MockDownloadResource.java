@@ -19,31 +19,27 @@
 package org.exoplatform.download;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * @author <a href="hoang281283@gmail.com">Minh Hoang TO</a>
  * @date 11/19/12
  */
-public class MockDownloadResource extends DownloadResource
+public class MockDownloadResource extends NewDownloadResource
 {
    private String id;
 
-   public MockDownloadResource(String id)
-   {
-      super(null);
-      this.id = id;
-   }
+    public MockDownloadResource(String id) {
+        super(null);
+        this.id = id;
+    }
 
-   @Override
-   public InputStream getInputStream() throws IOException
-   {
-      return null;
-   }
+    @Override
+    public void write(OutputStream out) throws IOException {
+    }
 
-   @Override
-   public int hashCode()
-   {
-      return id.hashCode();
-   }
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }

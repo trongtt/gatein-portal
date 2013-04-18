@@ -65,7 +65,12 @@ public class DownloadService {
 
     public DownloadResource getDownloadResource(String id) {
         DownloadResource resource = downloadResources_.get(id);
-        if (resource != null) {
+        if (resource instanceof NewDownloadResource) {
+            if (!((NewDownloadResource) resource).isRepeatable()) {
+                downloadResources_.remove(id);
+            }
+            return resource;
+        } else if (resource != null) {
             downloadResources_.remove(id);
             return resource;
         }

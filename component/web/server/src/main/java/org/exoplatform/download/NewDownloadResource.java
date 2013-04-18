@@ -19,37 +19,41 @@
 
 package org.exoplatform.download;
 
-import org.gatein.common.io.IOTools;
-
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-
 /**
- * Created by The eXo Platform SARL Author : Tuan Nguyen tuan08@users.sourceforge.net Dec 26, 2005
+ * New design of download resource, to be merged into DownloadResource in GateIn 4.0
+ *
+ * @author <a href="hoang281283@gmail.com">Minh Hoang TO</a>
+ * @date 4/17/13
  */
-public class FileDownloadResource extends NewDownloadResource {
+public abstract class NewDownloadResource extends DownloadResource {
 
-    private String path_;
+    private boolean repeatable = false;
 
-    public FileDownloadResource(String path, String resourceMimeType) {
-        this(null, path, resourceMimeType);
+    public NewDownloadResource(String resourceMimeType) {
+        super(null, resourceMimeType);
     }
 
-    public FileDownloadResource(String downloadType, String path, String resourceMimeType) {
+    public NewDownloadResource(String downloadType, String resourceMimeType) {
         super(downloadType, resourceMimeType);
-        path_ = path;
     }
 
     @Override
-    public void write(OutputStream out) throws IOException {
-        InputStream in = new FileInputStream(path_);
-        try {
-            IOTools.copy(in, out);
-        } finally {
-            IOTools.safeClose(in);
-        }
+    public final InputStream getInputStream() throws IOException {
+        throw new UnsupportedOperationException();
     }
+
+    public abstract void write(OutputStream out) throws IOException;
+
+    public boolean isRepeatable() {
+        return repeatable;
+    }
+
+    public void setRepeatable(boolean b) {
+        repeatable = b;
+    }
+
 }

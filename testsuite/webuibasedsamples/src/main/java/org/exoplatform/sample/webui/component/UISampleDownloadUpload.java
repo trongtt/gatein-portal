@@ -1,15 +1,12 @@
 package org.exoplatform.sample.webui.component;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.exoplatform.download.DownloadResource;
-import org.exoplatform.download.DownloadService;
-import org.exoplatform.download.InputStreamDownloadResource;
+import org.exoplatform.download.*;
 import org.exoplatform.upload.UploadResource;
 import org.exoplatform.upload.UploadService.UploadUnit;
 import org.exoplatform.webui.config.annotation.ComponentConfig;
@@ -20,6 +17,7 @@ import org.exoplatform.webui.event.EventListener;
 import org.exoplatform.webui.form.UIForm;
 import org.exoplatform.webui.form.UIFormUploadInput;
 import org.exoplatform.webui.form.input.UIUploadInput;
+import org.gatein.common.io.IOTools;
 
 @ComponentConfig(lifecycle = UIFormLifecycle.class, template = "app:/groovy/webui/component/UISampleDownloadUpload.gtmpl", events = { @EventConfig(listeners = UISampleDownloadUpload.SubmitActionListener.class) })
 public class UISampleDownloadUpload extends UIForm {
@@ -76,8 +74,17 @@ public class UISampleDownloadUpload extends UIForm {
                 UIFormUploadInput input = uiForm.getChildById("name" + index);
                 UploadResource uploadResource = input.getUploadResource();
                 if (uploadResource != null) {
-                    DownloadResource dresource = new InputStreamDownloadResource(input.getUploadDataAsStream(),
-                            uploadResource.getMimeType());
+                    final InputStream in = input.getUploadDataAsStream();
+                    DownloadResource dresource = new NewDownloadResource(uploadResource.getMimeType()) {
+                        @Override
+                        public void write(OutputStream out) throws IOException {
+                            try {
+                                IOTools.copy(in, out);
+                            } finally {
+                                IOTools.safeClose(in);
+                            }
+                        }
+                    };
                     dresource.setDownloadName(uploadResource.getFileName());
                     downloadLink.add(dservice.getDownloadLink(dservice.addDownloadResource(dresource)));
                     fileName.add(uploadResource.getFileName());
@@ -89,8 +96,7 @@ public class UISampleDownloadUpload extends UIForm {
                 UIUploadInput input = uiForm.getChildById("name" + index);
                 UploadResource[] uploadResources = input.getUploadResources();
                 for (UploadResource uploadResource : uploadResources) {
-                    DownloadResource dresource = new InputStreamDownloadResource(new FileInputStream(new File(
-                            uploadResource.getStoreLocation())), uploadResource.getMimeType());
+                    DownloadResource dresource = new FileDownloadResource(uploadResource.getStoreLocation(), uploadResource.getMimeType());
                     dresource.setDownloadName(uploadResource.getFileName());
                     downloadLink.add(dservice.getDownloadLink(dservice.addDownloadResource(dresource)));
                     fileName.add(uploadResource.getFileName());

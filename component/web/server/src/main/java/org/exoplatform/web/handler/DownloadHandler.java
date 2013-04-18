@@ -30,6 +30,7 @@ import org.exoplatform.container.ExoContainer;
 import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.download.DownloadResource;
 import org.exoplatform.download.DownloadService;
+import org.exoplatform.download.NewDownloadResource;
 import org.exoplatform.web.ControllerContext;
 import org.exoplatform.web.WebAppController;
 import org.exoplatform.web.WebRequestHandler;
@@ -75,13 +76,21 @@ public class DownloadHandler extends WebRequestHandler {
             }
         }
         res.setContentType(dresource.getResourceMimeType());
-        InputStream is = dresource.getInputStream();
-        try {
-            optimalRead(is, res.getOutputStream());
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        } finally {
-            is.close();
+        if (dresource instanceof NewDownloadResource) {
+            try {
+                ((NewDownloadResource) dresource).write(res.getOutputStream());
+            } catch (Exception e) {
+                log.error(e);
+            }
+        } else {
+            InputStream is = dresource.getInputStream();
+            try {
+                optimalRead(is, res.getOutputStream());
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            } finally {
+                is.close();
+            }
         }
     }
 

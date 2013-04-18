@@ -19,14 +19,17 @@
 
 package org.exoplatform.download;
 
+import org.gatein.common.io.IOTools;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 
 /**
  * Created by The eXo Platform SARL Author : Tuan Nguyen tuan08@users.sourceforge.net Dec 26, 2005
  */
-public class ClasspathDownloadResource extends DownloadResource {
+public class ClasspathDownloadResource extends NewDownloadResource {
 
     private String resource_;
 
@@ -39,9 +42,13 @@ public class ClasspathDownloadResource extends DownloadResource {
         resource_ = resource;
     }
 
-    public InputStream getInputStream() throws IOException {
-        ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        InputStream is = cl.getResourceAsStream(resource_);
-        return is;
+    @Override
+    public void write(OutputStream out) throws IOException {
+        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource_);
+        try {
+            IOTools.copy(in, out);
+        } finally {
+            IOTools.safeClose(in);
+        }
     }
 }
