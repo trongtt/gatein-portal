@@ -121,12 +121,3 @@
 	padding-right: 22px; /* orientation=rt */
 	line-height: 21px;
 }
- 
-.UIPermissionSelector .PermissionInfoContainer .SelectPermissionIcon	{
-	background: url('/eXoResources/skin/DefaultSkin/skinIcons/16x16/icons/SelectPermission.gif') no-repeat left center; /* orientation=lt */
-	background: url('/eXoResources/skin/DefaultSkin/skinIcons/16x16/icons/SelectPermission.gif') no-repeat right center; /* orientation=rt */
-	padding-left: 22px; /* orientation=lt */
-	padding-right: 22px; /* orientation=rt */
-	line-height: 21px;
-	height: auto; width: auto;
-} 
