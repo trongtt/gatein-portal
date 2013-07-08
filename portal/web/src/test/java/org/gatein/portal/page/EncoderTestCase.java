@@ -49,11 +49,17 @@ public class EncoderTestCase {
     public void testEscapeKey() {
         Encoder encoder = new Encoder(Collections.singletonMap(" ", new String[]{"value"}));
         Assert.assertEquals("%20:value", encoder.encode());
+
+        encoder = new Encoder(Collections.singletonMap("&", new String[]{"value"}));
+        Assert.assertEquals("%26:value", encoder.encode());
     }
 
     @Test
     public void testEscapeValue() {
         Encoder encoder = new Encoder(Collections.singletonMap("key", new String[]{" "}));
         Assert.assertEquals("key:%20", encoder.encode());
+
+        encoder = new Encoder(Collections.singletonMap("key", new String[]{"&"}));
+        Assert.assertEquals("key:%26", encoder.encode());
     }
 }

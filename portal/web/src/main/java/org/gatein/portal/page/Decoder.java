@@ -18,6 +18,8 @@
  */
 package org.gatein.portal.page;
 
+import juzu.impl.common.PercentCodec;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -157,8 +159,8 @@ public class Decoder {
         if (parameters == null) {
             parameters = new HashMap<String, String[]>();
         }
-        String name = Encoder.NAME_CODEC.decode(rawName);
-        String value = Encoder.VALUE_CODEC.decode(rawValue);
+        String name = Encoder.PORTLET_RENDER_PARAM_CODEC.decode(rawName);
+        String value = Encoder.PORTLET_RENDER_PARAM_CODEC.decode(rawValue);
         String[] parameter = parameters.get(rawName);
         if (parameter != null) {
             parameter = Tools.appendTo(parameter, value);

@@ -18,13 +18,12 @@
  */
 package org.gatein.portal.page;
 
+import juzu.impl.common.PercentCodec;
+
 import java.io.IOException;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.Map;
-
-import juzu.impl.common.PercentCodec;
 
 /**
  * @author <a href="mailto:julien.viet@exoplatform.com">Julien Viet</a>
@@ -32,10 +31,7 @@ import juzu.impl.common.PercentCodec;
 public class Encoder {
 
     /** . */
-    static final PercentCodec NAME_CODEC = PercentCodec.RFC3986_QUERY_PARAM_NAME;
-
-    /** . */
-    static final PercentCodec VALUE_CODEC = PercentCodec.create(
+    static final PercentCodec PORTLET_RENDER_PARAM_CODEC = PercentCodec.create(
             PercentCodec.RFC3986_QUERY_PARAM_VALUE.
                     clearBit(':').
                     clearBit(',')
@@ -78,9 +74,9 @@ public class Encoder {
                         } else {
                             first = false;
                         }
-                        NAME_CODEC.encode(parameter.getKey(), appendable);
+                        PORTLET_RENDER_PARAM_CODEC.encode(parameter.getKey(), appendable);
                         appendable.append(':');
-                        VALUE_CODEC.encode(s, appendable);
+                        PORTLET_RENDER_PARAM_CODEC.encode(s, appendable);
                     }
                 }
             }
