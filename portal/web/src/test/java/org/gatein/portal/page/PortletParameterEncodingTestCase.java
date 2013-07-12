@@ -78,7 +78,6 @@ public class PortletParameterEncodingTestCase extends AbstractPortalTestCase {
         driver.findElements(By.tagName("button")).get(0).click();
 
         String[] values = result.get("a%a");
-        System.out.println(result.keySet());
         Assert.assertEquals(1, result.keySet().size());
         Assert.assertNotNull(values);
         Assert.assertEquals("b%b", values[0]);
@@ -101,6 +100,19 @@ public class PortletParameterEncodingTestCase extends AbstractPortalTestCase {
         values = result.get("a&a");
         Assert.assertNotNull(values);
         Assert.assertEquals("b&b", values[0]);
+        values = result.get("c");
+        Assert.assertNotNull(values);
+        Assert.assertEquals("d", values[0]);
+
+        driver.findElements(By.name("_name")).get(0).sendKeys("a&a");
+        driver.findElements(By.name("_value")).get(0).sendKeys("B&B");
+        driver.findElements(By.tagName("button")).get(0).click();
+
+        Assert.assertTrue(result.keySet().size() == 2);
+        values = result.get("a&a");
+        Assert.assertNotNull(values);
+        Assert.assertEquals(2, values.length);
+        Assert.assertEquals(Arrays.asList("b&b", "B&B"), Arrays.asList(values));
         values = result.get("c");
         Assert.assertNotNull(values);
         Assert.assertEquals("d", values[0]);
