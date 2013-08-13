@@ -66,8 +66,8 @@ public class SocialNetworkServiceImpl implements SocialNetworkService, OAuthCode
 
         // TODO: Ugly, but it's used due to OrganizationService API limitations because it doesn't allow to find user by unique userProfile attribute
         try {
-            Method m = userHandler.getClass().getDeclaredMethod("findUserByUniqueAttribute", String.class, String.class);
-            return (User)m.invoke(userHandler, oauthProviderType.getUserNameAttrName(), oauthProviderUsername);
+            Method m = userHandler.getClass().getDeclaredMethod("findUserByUniqueAttribute", String.class, String.class, Boolean.class);
+            return (User)m.invoke(userHandler, oauthProviderType.getUserNameAttrName(), oauthProviderUsername, false);
         } catch (NoSuchMethodException e) {
             String error = "Method findUserByUniqueAttribute(String, String) is not available on userHandler object " + userHandler +
                     "of class " + userHandler.getClass();
