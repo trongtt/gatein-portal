@@ -286,6 +286,10 @@
           <field name="countPaginatedUsers">
             <boolean>true</boolean>
           </field>
+          
+          <field name="filterDisabledUsersInQueries">
+            <boolean>true</boolean>
+          </field>
 
           <!-- For DB+LDAP it is not possible to efficiently perform paginated membership query. Only way is to download
                all memberships from LDAP server and all memberships from DB and merge them together.
