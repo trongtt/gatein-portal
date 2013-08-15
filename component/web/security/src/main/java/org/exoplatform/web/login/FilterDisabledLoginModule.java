@@ -75,7 +75,7 @@ public class FilterDisabledLoginModule extends AbstractLoginModule {
                 } else if (user instanceof UserImpl && !((UserImpl) user).isEnabled()) {
                     HttpServletRequest request = getCurrentHttpServletRequest();
                     if (request != null) {
-                        request.setAttribute(DISABLED_USER_NAME, username);                        
+                        request.setAttribute(DISABLED_USER_NAME, username);
                     }
 
                     throw new LoginException("Can't authenticate. user " + username + " is disabled");
