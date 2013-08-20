@@ -66,9 +66,9 @@
             even = !even;
             if (bean instanceof org.exoplatform.services.organization.idm.UserImpl) {
                 if(!uicomponent.getFieldValue(bean, "enabled")) {
-                    rowStyle = "font-style: italic; background: darkgray"
+                    rowStyle = "font-style: italic; background: darkgray";
                 } else {
-                    rowStyle = "";
+                    rowStyle = null;
                 }
             }
       %>
