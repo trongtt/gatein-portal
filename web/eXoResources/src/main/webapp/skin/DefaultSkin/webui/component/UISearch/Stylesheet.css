@@ -101,6 +101,16 @@
 	width: 180px; height: 16px;
 }
 
+.UISearch .UISearchForm .QuickSet .uiCheckbox {
+	float: left; /* orientation=lt */
+	float: right; /* orientation=rt */
+	line-height: 25px;
+}
+
+.UISearch .UISearchForm .QuickSet .uiCheckbox input {
+	float: none;
+}
+
 .UIFormTabPane .UISearch .UISearchForm .QuickSet select {
 	float: left; /* orientation=lt */
 	float: right; /* orientation=rt */
