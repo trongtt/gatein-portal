@@ -91,11 +91,11 @@ public class ZoneLayout extends Layout {
         }
     }
 
-    private Template.Builder render1_column(ArrayList<Result.Fragment> l1) {
+    public Template.Builder render1_column(ArrayList<Result.Fragment> l1) {
         return factory.zone_1_column.with(Collections.<String, Object>singletonMap("l1", l1));
     }
 
-    private Template.Builder render2_columns_30_70(ArrayList<Result.Fragment> l1, ArrayList<Result.Fragment> l2) {
+    public Template.Builder render2_columns_30_70(ArrayList<Result.Fragment> l1, ArrayList<Result.Fragment> l2) {
         return factory.zone_2_columns_70_30.with(juzu.impl.common.Builder.map("l1", l1).map("l2", l2).build());
     }
 

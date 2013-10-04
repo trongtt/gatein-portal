@@ -1,5 +1,5 @@
 <div class="row">
-    <div class="span3">
+    <div id="1" class="span3 sortable">
         <% l1.each { fragment -> %>
         <div>
             <h3>${fragment.title}</h3>
@@ -7,7 +7,7 @@
         </div>
         <% } %>
     </div>
-    <div class="span9">
+    <div id="2" class="span9 sortable">
         <% l2.each { fragment -> %>
         <div>
             <h3>${fragment.title}</h3>
