@@ -30,8 +30,7 @@ public class PageNavigation {
     /** . */
     private String ownerId;
 
-    /** . */
-    private int priority = 1;
+    private int priority = Integer.MAX_VALUE;
 
     /** . */
     private ArrayList<NavigationFragment> fragments;
