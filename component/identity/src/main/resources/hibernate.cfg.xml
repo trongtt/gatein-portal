@@ -3,13 +3,13 @@
 <hibernate-configuration>
 	<session-factory>
 	
+	<!--	
 		<property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
 		<property name="hibernate.connection.url">jdbc:hsqldb:file:/home/phuongvv/workspace/exoportal/gatein-portal/master/packaging/tomcat/tomcat7/target/tomcat/gatein/data/db/data/jdbcidm_portal;shutdown=true;hsqldb.write_delay=false</property>
 		<property name="hibernate.connection.username">sa</property>
 		<property name="hibernate.connection.password"></property>
 		<property name="hibernate.dialect">org.hibernate.dialect.HSQLDialect</property>
 
-	<!--	
 		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
 		<property name="hibernate.connection.url">jdbc:mysql://localhost:3306/gateinidm</property>
 		<property name="hibernate.connection.username">root</property>

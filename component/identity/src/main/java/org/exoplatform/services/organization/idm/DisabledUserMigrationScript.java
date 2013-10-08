@@ -144,6 +144,12 @@ public class DisabledUserMigrationScript {
     private void setupHibernate(Properties config) throws Exception {
         final Configuration conf_ = new Configuration();
 
+        conf_.setProperty("hibernate.connection.driver_class", config.getProperty("hibernate.connection.driver_class"));
+        conf_.setProperty("hibernate.connection.url", config.getProperty("hibernate.connection.url"));
+        conf_.setProperty("hibernate.connection.username", config.getProperty("hibernate.connection.username"));
+        conf_.setProperty("hibernate.connection.password", config.getProperty("hibernate.connection.password"));
+        conf_.setProperty("hibernate.dialect", config.getProperty("hibernate.dialect"));
+
         String config_path = config.getProperty("hibernate.config_path");
         URL url = Thread.currentThread().getContextClassLoader().getResource(config_path);
         if (url == null) {
@@ -191,12 +197,12 @@ public class DisabledUserMigrationScript {
 
         String config_path = args.length > 0 ? args[0] : null;
         if (config_path != null) {
-            File file = new File(config_path);
-            if (!file.exists()) {
+            URL config_url = Thread.currentThread().getContextClassLoader().getResource(config_path);
+            if (config_url == null) {
                 log.error("config file is not found: {}", config_path);
             } else {
-                log.info("using config file {}", config_path);
-                config.load(new FileInputStream(file));
+                log.info("using config file {}", config_url);
+                config.load(config_url.openStream());
             }
         } else {
             log.info("using default config file");
