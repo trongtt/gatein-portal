@@ -24,20 +24,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.exoplaform.org/xml/ns/kernel_1_2.xsd http://www.exoplaform.org/xml/ns/kernel_1_2.xsd"
     xmlns="http://www.exoplaform.org/xml/ns/kernel_1_2.xsd">
-  <component>
-		<type>org.exoplatform.services.organization.idm.DisabledUserMigrationService</type>
-		<init-params>
-			<value-param>
-				<name>batch</name>
-				<value>100</value>
-			</value-param>
-			<value-param>
-				<name>enableAllUserDuringBoot</name>
-				<value>true</value>
-			</value-param>
-		</init-params>
-	</component>
-	
+
   <external-component-plugins>
     <target-component>org.exoplatform.services.organization.OrganizationService</target-component>
     <component-plugin>
