@@ -19,8 +19,6 @@
 
 package org.exoplatform.services.organization.idm;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.security.PrivilegedAction;
