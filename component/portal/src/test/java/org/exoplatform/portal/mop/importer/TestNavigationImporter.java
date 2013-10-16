@@ -47,19 +47,19 @@ import org.gatein.mop.core.api.MOPService;
  */
 public class TestNavigationImporter extends AbstractTestNavigationService {
 
-    public void _testInsertCreateNavigation() {
-        _testCreate(ImportMode.INSERT);
+    public void testInsertCreateNavigation() {
+        testCreate(ImportMode.INSERT);
     }
 
-    public void _testConserveCreateNavigation() {
-        _testCreate(ImportMode.CONSERVE);
+    public void testConserveCreateNavigation() {
+        testCreate(ImportMode.CONSERVE);
     }
 
-    public void _testOverwriteCreateNavigation() {
-        _testCreate(ImportMode.OVERWRITE);
+    public void testOverwriteCreateNavigation() {
+        testCreate(ImportMode.OVERWRITE);
     }
 
-    private void _testCreate(ImportMode mode) {
+    private void testCreate(ImportMode mode) {
         String name = mode.name() + "_create";
 
         //
@@ -108,7 +108,7 @@ public class TestNavigationImporter extends AbstractTestNavigationService {
         assertEquals(2, (int) ctx.getState().getPriority());
     }
 
-    public void _testInsertNavigation() {
+    public void testInsertNavigation() {
         MOPService mop = mgr.getPOMService();
         mop.getModel().getWorkspace().addSite(ObjectType.PORTAL_SITE, "insert_navigation");
         sync(true);
@@ -135,7 +135,7 @@ public class TestNavigationImporter extends AbstractTestNavigationService {
         assertEquals(0, a.getNodeCount());
     }
 
-    public void _testInsertFragment() {
+    public void testInsertFragment() {
         MOPService mop = mgr.getPOMService();
         mop.getModel().getWorkspace().addSite(ObjectType.PORTAL_SITE, "insert_fragment");
         sync(true);
@@ -162,19 +162,19 @@ public class TestNavigationImporter extends AbstractTestNavigationService {
         assertEquals(1, a.getNodeCount());
     }
 
-    public void _testCreateMerge() {
-        _testMerge(ImportMode.CONSERVE);
+    public void testCreateMerge() {
+        testMerge(ImportMode.CONSERVE);
     }
 
-    public void _testInsertMerge() {
-        _testMerge(ImportMode.INSERT);
+    public void testInsertMerge() {
+        testMerge(ImportMode.INSERT);
     }
 
-    public void _testOverwriteMerge() {
-        _testMerge(ImportMode.OVERWRITE);
+    public void testOverwriteMerge() {
+        testMerge(ImportMode.OVERWRITE);
     }
 
-    private void _testMerge(ImportMode importMode) {
+    private void testMerge(ImportMode importMode) {
         String name = importMode.name() + "_merge";
 
         //
@@ -265,7 +265,7 @@ public class TestNavigationImporter extends AbstractTestNavigationService {
         }
     }
 
-    public void _testOrder() {
+    public void testOrder() {
         MOPService mop = mgr.getPOMService();
         mop.getModel().getWorkspace().addSite(ObjectType.PORTAL_SITE, "order");
         sync(true);
@@ -316,7 +316,7 @@ public class TestNavigationImporter extends AbstractTestNavigationService {
         assertEquals("e", node.get(4).getName());
     }
 
-    public void _testExtendedLabel() {
+    public void testExtendedLabel() {
         MOPService mop = mgr.getPOMService();
         mop.getModel().getWorkspace().addSite(ObjectType.PORTAL_SITE, "extended_label");
         sync(true);
@@ -453,7 +453,7 @@ public class TestNavigationImporter extends AbstractTestNavigationService {
         assertEquals("bar_c_en", c.getState().getLabel());
     }
 
-    public void _testFullNavigation() {
+    public void testFullNavigation() {
         MOPService mop = mgr.getPOMService();
         mop.getModel().getWorkspace().addSite(ObjectType.PORTAL_SITE, "full_navigation");
         sync(true);

@@ -87,6 +87,6 @@ public class PageNavigation {
 
     @Override
     public String toString() {
-        return "PageNavigation[ownerType=" + ownerType + ",ownerId=" + ownerId + "]";
+        return "PageNavigation[ownerType=" + ownerType + ",ownerId=" + ownerId + ", priority=" + priority +"]";
     }
 }
