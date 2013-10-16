@@ -286,15 +286,6 @@ public class UserPortalConfigService implements Startable {
         // Create the portal from the template
         createUserPortalConfig(PortalConfig.USER_TYPE, userName, "user");
 
-        // Need to insert the corresponding user site if needed
-        PortalConfig cfg = storage_.getPortalConfig(PortalConfig.USER_TYPE, userName);
-        if (cfg == null) {
-            cfg = new PortalConfig(PortalConfig.USER_TYPE);
-            cfg.setPortalLayout(new Container());
-            cfg.setName(userName);
-            storage_.create(cfg);
-        }
-
         // Create a blank navigation if needed
         SiteKey key = SiteKey.user(userName);
         NavigationContext nav = navService.loadNavigation(key);
@@ -318,15 +309,6 @@ public class UserPortalConfigService implements Startable {
     public void createGroupSite(String groupId) throws Exception {
         // Create the portal from the template
         createUserPortalConfig(PortalConfig.GROUP_TYPE, groupId, "group");
-
-        // Need to insert the corresponding group site
-        PortalConfig cfg = storage_.getPortalConfig(PortalConfig.GROUP_TYPE, groupId);
-        if (cfg == null) {
-            cfg = new PortalConfig(PortalConfig.GROUP_TYPE);
-            cfg.setPortalLayout(new Container());
-            cfg.setName(groupId);
-            storage_.create(cfg);
-        }
     }
 
     /**
@@ -338,6 +320,10 @@ public class UserPortalConfigService implements Startable {
      * @throws Exception any exception
      */
     public void createUserPortalConfig(String siteType, String siteName, String template) throws Exception {
+        if (storage_.getPortalConfig(siteType, siteName) != null) {
+            return;
+        }
+
         String templatePath = newPortalConfigListener_.getTemplateConfig(siteType, template);
 
         NewPortalConfig portalConfig = new NewPortalConfig(templatePath);
