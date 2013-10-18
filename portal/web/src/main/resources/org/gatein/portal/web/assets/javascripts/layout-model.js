@@ -245,12 +245,16 @@
     var PageContainer = Container.extend({
         //Work around to force PUT method when call save()
         id : "layout",
-
+        
         setLayoutId : function(layoutId) {
             this.set("layout_id", layoutId)
         },
         getLayoutId : function() {
             return this.get("layout_id");
+        },
+        
+        acceptMerge : function(b) {
+        		this.set("merge", b);
         },
 
         setUrlRoot : function(url) {
@@ -265,7 +269,7 @@
         },
 
         toJSON : function() {
-            var data = {id : this.getId(), layout_id: this.getLayoutId(), "type": "container", childrens : []};
+            var data = {id : this.getId(), layout_id: this.getLayoutId(),merge : this.get("merge") , "type": "container", childrens : []};
             this.get('_childrens').each(function(elem) {
                 data.childrens.push(elem.toJSON());
             });
@@ -288,7 +292,6 @@
 
 					var portlets = result.data.portlets;
 					$(portlets).each(function(i, portlet){
-						console.log(portlet);
 						_this.addChild(new Application({name: portlet.name}));
 					});
 				}

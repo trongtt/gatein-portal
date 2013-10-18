@@ -59,7 +59,17 @@
 </script>
 <%}%>
 <!-- end composer -->
-
+<!-- Message confirmation -->
+<div id="mergeConfirm" class="alert" style="display : none;">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <strong>Warning!</strong> The layout has modified. It sounds good for merge
+  <a class="btn" href="#">merge</a>
+</div>
+<div id="mergeError" class="alert alert-error" style="display : none;">
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <strong>Error!</strong> The layout has modified. Can not merge
+</div>
+<!-- end -->
 <div class="pageBody">
 ${body}
 </div>

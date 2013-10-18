@@ -207,19 +207,41 @@ public class PageEditor {
                     this.buildComponentTree(pageStructure, j, rootContainer);
                 }
 
-                layoutService.saveLayout(new ContainerAdapter(rootContainer), rootContainer, pageStructure, null);
+                boolean noChanged = Boolean.parseBoolean(System.getProperty("noChanged"));
+                boolean mergeable = Boolean.parseBoolean(System.getProperty("mergeable"));
+                if (noChanged) {
+                    layoutService.saveLayout(new ContainerAdapter(rootContainer), rootContainer, pageStructure, null);
 
-                //Update layout
-                String layoutId = action.getString("layout_id");
-                if (layoutId != null && !layoutId.isEmpty()) {
-                    page.setState(page.getState().builder().factoryId(layoutId).build());
-                    pageService.savePage(page);
+                    //Update layout
+                    String layoutId = action.getString("layout_id");
+                    if (layoutId != null && !layoutId.isEmpty()) {
+                        page.setState(page.getState().builder().factoryId(layoutId).build());
+                        pageService.savePage(page);
+                    }
+
+                    result.set("code", 200);
+                    result.set("status", "success");
+                } else if (mergeable) {
+                    if (action.getString("merge") == null) {
+                        result.set("code", 200);
+                        result.set("status", "merge");
+                    } else {
+                        layoutService.saveLayout(new ContainerAdapter(rootContainer), rootContainer, pageStructure, null);
+
+                        //Update layout
+                        String layoutId = action.getString("layout_id");
+                        if (layoutId != null && !layoutId.isEmpty()) {
+                            page.setState(page.getState().builder().factoryId(layoutId).build());
+                            pageService.savePage(page);
+                        }
+                        
+                        result.set("code", 200);
+                        result.set("status", "success");
+                    }
+                } else {
+                    result.set("code", 200);
+                    result.set("status", "unmergeable");
                 }
-
-
-                result.set("code", 200);
-                result.set("status", "success");
-                result.set("message", "OK");
             } catch (Exception ex) {
                 result.set("code", 400);
                 result.set("status", "error");

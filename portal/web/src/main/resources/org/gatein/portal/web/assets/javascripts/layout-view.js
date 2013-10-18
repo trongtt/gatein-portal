@@ -4,7 +4,11 @@
 		
 		events : {
 			"click a.switch" : "switchLayout",
-			"click button.close" : "deleteApp"
+			"click .portlet button.close" : "deleteApp",
+			"click #mergeConfirm button.close" : "closeAlert",
+			"click #mergeError button.close" : "closeAlert",
+			"click #saveLayout" : "saveLayout",
+			"click #mergeConfirm a.btn" : "acceptMerge"
 		},
 
         initialize : function() {
@@ -23,23 +27,9 @@
         	    		var idx = prev.length ? $('#' + cont.getId() + ' > .portlet').index(prev.get(0)) + 1 : 0;
 
         	    		cont.addChild(ui.item.attr('id'), {at : idx});
-
-                        window.snapshotModel = view.model;
+                   window.snapshotModel = view.model;
         	    	}
         		});
-                this.$("#saveLayout").off().click(function(){
-                    view.model.save().done(function($data){
-                        if($data.code == 200) {
-                            $url = _.result(view.model, 'url');
-                            window.location.href = $url;
-                        } else {
-                            alert("error: " + data.message);
-                        }
-                    }).error(function($error){
-                        alert("error on connect to server");
-                    });
-                    return false;
-                });
         	}
         	this.listenTo(this.model, 'addChild.eXo.Container', this.onAddChild);
         	this.listenTo(this.model, 'removeChild.eXo.Container', this.onRemoveChild);
@@ -72,6 +62,37 @@
         	var containerId = $(e.target).closest('div.sortable').attr('id')
         	var container = this.model.getDescendant(containerId);
         	container.removeChild(appId);
+        },
+        
+        closeAlert : function(e) {
+        	$(e.target).parent().hide();
+        },
+        
+        saveLayout : function(e) {
+        	var view = window.layoutView;
+        	view.model.save().done(function($data){
+            if($data.code == 200) {
+            	if ($data.status == 'success') {
+            		$url = _.result(view.model, 'url');
+                window.location.href = $url;
+            	} else if ($data.status == 'merge') {
+            		$("#mergeConfirm").show();
+            	} else if ($data.status == 'unmergeable') {
+            		$("#mergeError").show();
+            	}
+            } else {
+                alert("error: " + $data.message);
+            }
+        	}).error(function($error){
+            alert("error on connect to server");
+        	});
+        },
+        
+        acceptMerge : function(e) {
+        	var view = window.layoutView;
+        	view.model.acceptMerge("true");
+        	this.saveLayout(e);
+        	this.closeAlert(e);
         },
         
         switchLayout : function(e) {
