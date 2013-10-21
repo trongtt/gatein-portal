@@ -169,8 +169,8 @@ public class NavigationMarshaller implements Marshaller<PageNavigation> {
         if (navigator.getName() == Element.NODE_NAVIGATION) {
             Element next = navigator.child();
             if (next == Element.PRIORITY) {
-                Integer priority = parseContent(navigator, ValueType.INTEGER, Integer.MAX_VALUE);
-                navigation.setPriority(priority);
+                Integer priority = parseContent(navigator, ValueType.INTEGER, -1);
+                navigation.setPriority(priority < 1 ? -1 : priority);
             } else if (next == Element.PAGE_NODES) {
                 unmarshalPageNode(navigation, navigator, next);
                 return navigation;
