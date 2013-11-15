@@ -20,6 +20,7 @@
 package org.gatein.portal.web.page;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -31,7 +32,9 @@ import juzu.Resource;
 import juzu.Response;
 import juzu.Route;
 import juzu.impl.common.JSON;
+import juzu.impl.common.Tools;
 import juzu.impl.request.Request;
+import juzu.request.ClientContext;
 import juzu.request.ResourceContext;
 import org.gatein.pc.api.Portlet;
 import org.gatein.pc.api.info.MetaInfo;
@@ -88,6 +91,12 @@ public class PageEditor {
         data.set("html", sb.toString());
 
         return Response.status(200).body(data.toString());
+    }
+    
+    @Resource
+    @Route(value = "/upload")
+    public Response upload(ClientContext context) throws Exception {
+        return Response.status(200).body("uploaded");
     }
 
     @Resource
