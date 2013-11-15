@@ -109,6 +109,8 @@
 
 .UISearch .UISearchForm .QuickSet .uiCheckbox input {
 	float: none;
+    width: auto;
+    vertical-align: middle;
 }
 
 .UIFormTabPane .UISearch .UISearchForm .QuickSet select {
