@@ -313,7 +313,7 @@ public class UserDAOImpl extends AbstractDAOImpl implements UserHandler {
         if (enabledOnly) {
             qb = addDisabledUserFilter(qb);
         }
-        return new IDMUserListAccess(qb, 20, true, enabledOnly);
+        return new IDMUserListAccess(qb, 20, !countPaginatedUsers(), enabledOnly);
     }
 
     //
