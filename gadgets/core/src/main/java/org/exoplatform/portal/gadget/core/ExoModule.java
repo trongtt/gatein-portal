@@ -21,10 +21,12 @@ package org.exoplatform.portal.gadget.core;
 
 import org.apache.shindig.config.ContainerConfig;
 import org.apache.shindig.gadgets.http.HttpFetcher;
-import org.apache.shindig.protocol.conversion.BeanAtomConverter;
 import org.apache.shindig.protocol.conversion.BeanConverter;
 import org.apache.shindig.protocol.conversion.BeanJsonConverter;
-import org.apache.shindig.protocol.conversion.BeanXmlConverter;
+import org.apache.shindig.protocol.conversion.BeanXStreamConverter;
+import org.apache.shindig.protocol.conversion.xstream.XStreamConfiguration;
+import org.apache.shindig.social.core.util.BeanXStreamAtomConverter;
+import org.apache.shindig.social.core.util.xstream.XStream081Configuration;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
@@ -44,8 +46,9 @@ public class ExoModule extends AbstractModule {
         bind(ContainerConfig.class).to(ExoContainerConfig.class);
         bind(HttpFetcher.class).to(ExoHttpFetcher.class);
 
-        bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.xml")).to(BeanXmlConverter.class);
+        bind(XStreamConfiguration.class).to(XStream081Configuration.class);
+        bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.xml")).to(BeanXStreamConverter.class);
         bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.json")).to(BeanJsonConverter.class);
-        bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.atom")).to(BeanAtomConverter.class);
+        bind(BeanConverter.class).annotatedWith(Names.named("shindig.bean.converter.atom")).to(BeanXStreamAtomConverter.class);
     }
 }

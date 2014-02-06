@@ -66,7 +66,7 @@ public class ExoPropertiesModule extends PropertiesModule {
         }
     }
 
-    private Properties readPropertyFile(String propertyFile) {
+    protected Properties readPropertyFile(String propertyFile) {
         Properties properties = null;
         InputStream is = null;
 
@@ -93,6 +93,13 @@ public class ExoPropertiesModule extends PropertiesModule {
             if (is != null) {
                 properties = new Properties();
                 properties.load(is);
+            }
+
+            for (Object key : properties.keySet()) {
+                String value = (String)properties.get((String)key);
+                if (value != null && value.contains("%contextRoot%")){
+                  properties.put(key, value.replace(("%contextRoot%"),getContextRoot()));
+                }
             }
         } catch (IOException e) {
             throw new CreationException(Arrays.asList(new Message("Unable to load properties: " + propertyFile)));

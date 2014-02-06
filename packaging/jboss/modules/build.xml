@@ -74,6 +74,7 @@
        <maven-resource group="aopalliance" artifact="aopalliance"/>
        <maven-resource group="org.gatein.shindig" artifact="shindig-common"/>
        <maven-resource group="org.gatein.shindig" artifact="shindig-features"/>
+       <maven-resource group="org.gatein.shindig" artifact="shindig-extras"/>
        <maven-resource group="org.gatein.shindig" artifact="shindig-gadgets"/>
        <maven-resource group="org.gatein.shindig" artifact="shindig-social-api"/>
        <maven-resource group="caja" artifact="caja"/>
@@ -136,6 +137,7 @@
 
     <module-def name="com.google.javascript">
       <maven-resource group="com.google.javascript" artifact="closure-compiler"/>
+      <maven-resource group="args4j" artifact="args4j"/>
     </module-def>
 
     <module-def name="org.codehaus.plexus">
@@ -433,6 +435,10 @@
 
     <module-def name="org.apache.portals-bridges-common">
       <maven-resource group="org.apache.portals.bridges" artifact="portals-bridges-common"/>
+    </module-def>
+   
+    <module-def name="org.apache.commons.commons-lang3">
+      <maven-resource group="org.apache.commons" artifact="commons-lang3"/>
     </module-def>
 
     <module-def name="org.gatein.wsrp">

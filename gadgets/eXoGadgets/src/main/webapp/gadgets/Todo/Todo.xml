@@ -142,8 +142,8 @@
 					reArrange();
 				}
 				
-				function focusFirstTask(firstInput) {
-					if(firstInput.value == '1. __MSG_type_here__') {
+				function focusFirstTask(firstInput) {				   
+					if(firstInput.value == firstInput.getAttribute('data-init')) {
 						firstInput.focus();
 						firstInput.value = "1.";
 					}
@@ -224,7 +224,7 @@
 		</script>
 			<div class="Note">
 	    	<div class="write" id="write">
-	        <input type="text" id="1" onfocus="focusFirstTask(this);" value="1. __MSG_type_here__" name="1" onkeydown="setEnterKey(event);"/>
+	        <input type="text" id="1" onfocus="focusFirstTask(this);" value="1. __MSG_type_here__" name="1" onkeydown="setEnterKey(event);" data-init="1. __MSG_type_here__"/>
 	        <input type="text" id="2" name="2" onkeydown="setEnterKey(event);"/>
 	        <input type="text" id="3" name="3" onkeydown="setEnterKey(event);"/>
 					<input type="text" id="4" name="4" onkeydown="setEnterKey(event);"/>

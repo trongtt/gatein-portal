@@ -32,6 +32,13 @@
   <component>
     <key>org.exoplatform.web.application.javascript.JavascriptConfigService</key>
     <type>org.exoplatform.web.application.javascript.JavascriptConfigService</type>
+    <init-params>
+      <value-param>
+        <name>js.load.timeout</name>
+        <description>js loader timeout</description>
+        <value>15</value>
+      </value-param>
+    </init-params>
   </component>
 
   <component>
@@ -40,10 +47,6 @@
 
   <component>
     <type>org.exoplatform.portal.application.PortalStatisticService</type>
-  </component>
-
-  <component>
-    <type>org.exoplatform.web.application.javascript.JavascriptConfigService</type>
   </component>
 
   <component>

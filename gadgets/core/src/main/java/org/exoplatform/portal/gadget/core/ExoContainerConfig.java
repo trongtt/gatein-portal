@@ -27,6 +27,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 import org.apache.shindig.auth.BlobCrypterSecurityTokenCodec;
+import org.apache.shindig.common.Nullable;
 import org.apache.shindig.config.ContainerConfigException;
 import org.apache.shindig.expressions.Expressions;
 import org.exoplatform.commons.utils.PropertyManager;
@@ -73,9 +74,12 @@ public class ExoContainerConfig extends GateInJsonContainerConfig {
     private String signingKey_;
 
     @Inject
-    public ExoContainerConfig(@Named("shindig.containers.default") String s, Expressions expressions)
-            throws ContainerConfigException {
-        super(s, expressions);
+    public ExoContainerConfig(@Named("shindig.containers.default") String containers,
+            @Nullable @Named("shindig.host") String host,
+            @Nullable @Named("shindig.port") String port,
+            @Nullable @Named("shindig.contextroot") String contextRoot,
+            Expressions expressions) throws ContainerConfigException {
+        super(containers, host, port, contextRoot, expressions);
 
         // This ensures RootContainer initialized first
         // to populate properties in configuration.properties into PropertyManager
@@ -163,7 +167,7 @@ public class ExoContainerConfig extends GateInJsonContainerConfig {
 
     @Override
     public Object getProperty(String container, String property) {
-        if (property.equals(BlobCrypterSecurityTokenCodec.SECURITY_TOKEN_KEY_FILE) && tokenKey_ != null) {
+        if (property.equals(BlobCrypterSecurityTokenCodec.SECURITY_TOKEN_KEY) && tokenKey_ != null) {
             return tokenKey_;
         }
         if (property.equals(ExoOAuthModule.SIGNING_KEY_FILE) && signingKey_ != null) {

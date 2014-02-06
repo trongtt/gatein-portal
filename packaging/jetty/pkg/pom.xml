@@ -395,6 +395,10 @@
     </dependency>
     <dependency>
       <groupId>org.gatein.shindig</groupId>
+      <artifactId>shindig-extras</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.gatein.shindig</groupId>
       <artifactId>shindig-common</artifactId>
     </dependency>
     <dependency>

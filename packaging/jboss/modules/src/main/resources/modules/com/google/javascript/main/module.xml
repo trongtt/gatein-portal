@@ -28,5 +28,6 @@
   </resources>
   <dependencies>
     <module name="com.google.guava" slot="gatein"/>
+    <module name="org.json"/>
   </dependencies>
 </module>

@@ -18,25 +18,32 @@
  */
 package org.exoplatform.portal.gadget.server;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.Map;
-
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Map;
+
 import org.apache.commons.io.IOUtils;
-import org.apache.shindig.common.PropertiesModule;
 import org.apache.shindig.common.cache.ehcache.EhCacheModule;
+import org.apache.shindig.common.servlet.GuiceServletContextListener;
 import org.apache.shindig.gadgets.DefaultGuiceModule;
+import org.apache.shindig.gadgets.admin.GadgetAdminModule;
+import org.apache.shindig.gadgets.oauth2.OAuth2MessageModule;
+import org.apache.shindig.gadgets.oauth2.OAuth2Module;
+import org.apache.shindig.gadgets.oauth2.handler.OAuth2HandlerModule;
+import org.apache.shindig.gadgets.oauth2.persistence.sample.OAuth2PersistenceModule;
 import org.apache.shindig.gadgets.servlet.AuthenticationModule;
 import org.apache.shindig.gadgets.servlet.ConcatProxyServlet;
 import org.apache.shindig.gadgets.servlet.GadgetRenderingServlet;
 import org.apache.shindig.gadgets.servlet.JsServlet;
 import org.apache.shindig.gadgets.servlet.MakeRequestServlet;
+import org.exoplatform.commons.utils.PropertyManager;
 import org.exoplatform.portal.gadget.core.ExoModule;
 import org.exoplatform.portal.gadget.core.ExoOAuthModule;
+import org.exoplatform.portal.gadget.core.ExoPropertiesModule;
 import org.exoplatform.portal.gadget.core.GateInGuiceServletContextListener;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ResourceHandler;
@@ -56,13 +63,13 @@ import com.google.common.collect.Maps;
 public class EndToEndServer {
     private static final int JETTY_PORT = 9003;
 
-    private static final String GADGET_BASE = "/eXoGadgetServer/gadgets/ifr";
+    private static final String GADGET_BASE = "/gadgets/ifr";
 
-    private static final String CONCAT_BASE = "/eXoGadgetServer/gadgets/concat";
+    private static final String CONCAT_BASE = "/gadgets/concat";
 
-    private static final String JS_BASE = "/eXoGadgetServer/gadgets/js/*";
+    private static final String JS_BASE = "/gadgets/js/*";
 
-    private static final String MAKE_REQUEST_BASE = "/eXoGadgetServer/gadgets/makeRequest";
+    private static final String MAKE_REQUEST_BASE = "/gadgets/makeRequest";
 
     public static final String SERVER_URL = "http://localhost:" + JETTY_PORT;
 
@@ -112,16 +119,27 @@ public class EndToEndServer {
         URL resource = EndToEndTest.class.getResource("/endtoend");
         resources.setBaseResource(Resource.newResource(resource));
         newServer.addHandler(resources);
+        
+        PropertyManager.setProperty("gatein.gadgets.dir", resource.getFile());
 
         Context context = new Context(newServer, "/", Context.SESSIONS);
         context.addEventListener(new GateInGuiceServletContextListener());
 
         Map<String, String> initParams = Maps.newHashMap();
-        String modules = Joiner.on(":").join(ExoModule.class.getName(), ExoOAuthModule.class.getName(),
-                DefaultGuiceModule.class.getName(), AuthenticationModule.class.getName(), PropertiesModule.class.getName(),
-                EhCacheModule.class.getName());
+        String modules = Joiner.on(":").join(
+                ExoModule.class.getName(), 
+                ExoOAuthModule.class.getName(),
+                DefaultGuiceModule.class.getName(), 
+                AuthenticationModule.class.getName(), 
+                ExoPropertiesModule.class.getName(),
+                EhCacheModule.class.getName(), 
+                OAuth2Module.class.getName(), 
+                OAuth2MessageModule.class.getName(),
+                OAuth2HandlerModule.class.getName(), 
+                OAuth2PersistenceModule.class.getName(), 
+                GadgetAdminModule.class.getName());
 
-        initParams.put(GateInGuiceServletContextListener.MODULES_ATTRIBUTE, modules);
+        initParams.put(GuiceServletContextListener.MODULES_ATTRIBUTE, modules);
         context.setInitParams(initParams);
 
         // Attach the gadget rendering servlet
@@ -146,7 +164,7 @@ public class EndToEndServer {
 
         return newServer;
     }
-
+    
     static private class EchoServlet extends HttpServlet {
 
         @Override

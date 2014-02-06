@@ -37,13 +37,23 @@
       org.exoplatform.portal.gadget.core.ExoOAuthModule:
       org.apache.shindig.common.cache.ehcache.EhCacheModule:
       org.exoplatform.portal.gadget.core.ExoModule:
-      org.exoplatform.portal.gadget.core.ExtraFeatureModule
+      org.exoplatform.portal.gadget.core.ExtraFeatureModule:
+      org.apache.shindig.gadgets.oauth2.OAuth2Module:
+      org.apache.shindig.gadgets.oauth2.OAuth2MessageModule:
+      org.apache.shindig.gadgets.oauth2.handler.OAuth2HandlerModule: 
+      org.apache.shindig.gadgets.oauth2.persistence.sample.OAuth2PersistenceModule:
+      org.apache.shindig.gadgets.admin.GadgetAdminModule
     </param-value>
   </context-param>
 
   <filter>
     <filter-name>authFilter</filter-name>
     <filter-class>org.apache.shindig.auth.AuthenticationServletFilter</filter-class>
+  </filter>
+  
+  <filter>
+    <filter-name>etagFilter</filter-name>
+    <filter-class>org.apache.shindig.gadgets.servlet.ETagFilter</filter-class>
   </filter>
 
   <filter>
@@ -62,28 +72,26 @@
     <url-pattern>/gadgets/js/*</url-pattern>
     <url-pattern>/gadgets/proxy/*</url-pattern>
     <url-pattern>/gadgets/concat</url-pattern>
+    <url-pattern>/gadgets/makeRequest</url-pattern>
     <url-pattern>/rpc/*</url-pattern>
     <url-pattern>/rest/*</url-pattern>
   </filter-mapping>
 
   <filter-mapping>
     <filter-name>authFilter</filter-name>
+    <url-pattern>/social/*</url-pattern>
     <url-pattern>/gadgets/ifr</url-pattern>
-  </filter-mapping>
-
-  <filter-mapping>
-    <filter-name>authFilter</filter-name>
     <url-pattern>/gadgets/makeRequest</url-pattern>
-  </filter-mapping>
-
-  <filter-mapping>
-    <filter-name>authFilter</filter-name>
+    <url-pattern>/gadgets/proxy</url-pattern>
     <url-pattern>/gadgets/api/rpc/*</url-pattern>
-  </filter-mapping>
-
-  <filter-mapping>
-    <filter-name>authFilter</filter-name>
     <url-pattern>/gadgets/api/rest/*</url-pattern>
+    <url-pattern>/rpc/*</url-pattern>
+    <url-pattern>/rest/*</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>etagFilter</filter-name>
+    <url-pattern>*</url-pattern>
   </filter-mapping>
 
   <filter-mapping>
@@ -102,7 +110,7 @@
       org.apache.shindig.gadgets.servlet.GadgetRenderingServlet
     </servlet-class>
   </servlet>
-
+  
   <!-- Proxy -->
   <servlet>
     <servlet-name>proxy</servlet-name>
@@ -111,6 +119,14 @@
     </servlet-class>
   </servlet>
 
+  <!-- makeRequest -->
+  <servlet>
+    <servlet-name>makeRequest</servlet-name>
+    <servlet-class>
+      org.apache.shindig.gadgets.servlet.MakeRequestServlet
+    </servlet-class>
+  </servlet>
+  
   <servlet>
     <servlet-name>concat</servlet-name>
     <servlet-class>
@@ -125,7 +141,14 @@
       org.apache.shindig.gadgets.servlet.OAuthCallbackServlet
     </servlet-class>
   </servlet>
-
+  
+  <servlet>
+    <servlet-name>oauth2callback</servlet-name>
+    <servlet-class>
+      org.apache.shindig.gadgets.servlet.OAuth2CallbackServlet
+    </servlet-class>
+  </servlet>
+  
   <!-- Metadata RPC -->
   <servlet>
     <servlet-name>metadata</servlet-name>
@@ -133,19 +156,18 @@
       org.apache.shindig.gadgets.servlet.RpcServlet
     </servlet-class>
   </servlet>
-
-  <!-- makeRequest -->
+  
+  <!-- Serve OAuth 2 APIs -->
   <servlet>
-    <servlet-name>makeRequest</servlet-name>
+    <servlet-name>OAuth2Servlet</servlet-name>
     <servlet-class>
-      org.apache.shindig.gadgets.servlet.MakeRequestServlet
+      org.apache.shindig.social.core.oauth2.OAuth2Servlet
     </servlet-class>
   </servlet>
 
-
   <!-- Serve gadgets RPC api -->
   <servlet>
-    <servlet-name>gadgetsJsonRpcServlet</servlet-name>
+    <servlet-name>jsonRpcServlet</servlet-name>
     <servlet-class>
       org.apache.shindig.protocol.JsonRpcServlet
     </servlet-class>
@@ -156,7 +178,7 @@
   </servlet>
 
   <servlet>
-    <servlet-name>gadgetsRestapiServlet</servlet-name>
+    <servlet-name>restapiServlet</servlet-name>
     <servlet-class>
       org.apache.shindig.protocol.DataServiceServlet
     </servlet-class>
@@ -171,7 +193,7 @@
     <servlet-name>js</servlet-name>
     <servlet-class>org.apache.shindig.gadgets.servlet.JsServlet</servlet-class>
   </servlet>
-
+  
   <servlet-mapping>
     <servlet-name>js</servlet-name>
     <url-pattern>/gadgets/js/*</url-pattern>
@@ -188,14 +210,18 @@
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>gadgetsJsonRpcServlet</servlet-name>
+    <servlet-name>jsonRpcServlet</servlet-name>
+    <url-pattern>/rpc/*</url-pattern>
     <url-pattern>/gadgets/api/rpc/*</url-pattern>
+    <url-pattern>/social/rpc/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
-    <servlet-name>gadgetsRestapiServlet</servlet-name>
+    <servlet-name>restapiServlet</servlet-name>
+    <url-pattern>/rest/*</url-pattern>
     <url-pattern>/gadgets/api/rest/*</url-pattern>
-  </servlet-mapping>
+    <url-pattern>/social/rest/*</url-pattern>
+  </servlet-mapping>  
 
   <servlet-mapping>
     <servlet-name>concat</servlet-name>
@@ -205,6 +231,16 @@
   <servlet-mapping>
     <servlet-name>oauthCallback</servlet-name>
     <url-pattern>/gadgets/oauthcallback</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>oauth2callback</servlet-name>
+    <url-pattern>/gadgets/oauth2callback</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>OAuth2Servlet</servlet-name>
+    <url-pattern>/oauth2/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>

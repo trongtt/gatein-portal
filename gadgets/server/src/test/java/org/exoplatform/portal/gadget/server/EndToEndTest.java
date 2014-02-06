@@ -122,7 +122,7 @@ public class EndToEndTest extends AbstractPortalTest {
             url += "&caja=1&libs=caja";
         }
 
-        url += "&nocache=1";
+        url += "&nocache=1&debug=1";
         if (language != null) {
             url += "&lang=" + language;
         }
@@ -130,6 +130,7 @@ public class EndToEndTest extends AbstractPortalTest {
         if (!(page instanceof HtmlPage)) {
             fail("Got wrong page type. Was: " + page.getWebResponse().getContentType());
         }
+        
         webClient.waitForBackgroundJavaScript(3000);
         return (HtmlPage) page;
     }

@@ -42,7 +42,7 @@
     <org.exoplatform.ws.version>2.4.0-CR2</org.exoplatform.ws.version>
     <org.exoplatform.jcr.version>1.16.0-CR2</org.exoplatform.jcr.version>
     <org.exoplatform.framework.junit.version>1.2.4-GA</org.exoplatform.framework.junit.version>
-    <org.shindig.version>2.0.2.Final-gatein-4</org.shindig.version>
+    <org.shindig.version>2.5.1.Final-gatein-1-SNAPSHOT</org.shindig.version>
     <nl.captcha.simplecaptcha.version>1.1.1.Final-gatein-4</nl.captcha.simplecaptcha.version>
     <org.gatein.api.version>1.1.0.Final</org.gatein.api.version>
     <org.gatein.common.version>2.2.2.Final</org.gatein.common.version>
@@ -59,7 +59,7 @@
     <jcip.version>1.0</jcip.version>
     <commons-dbcp.version>1.4</commons-dbcp.version>
     <commons-logging.version>1.1.1</commons-logging.version>
-    <com.google.javascript.version>r1592</com.google.javascript.version>
+    <com.google.javascript.version>v20131014</com.google.javascript.version>
     <plexus-io.version>2.0.6</plexus-io.version>
     <jboss-dmr.version>1.1.1.Final</jboss-dmr.version>
     <org.jboss.portletbridge.version>3.3.1.Final</org.jboss.portletbridge.version>
@@ -151,6 +151,32 @@
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-io</artifactId>
         <version>${plexus-io.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>14.0.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.1</version>
+      </dependency>
+      <dependency>
+        <groupId>net.sf.ehcache</groupId>
+        <artifactId>ehcache-core</artifactId>
+        <version>2.5.2</version>
+      </dependency>
+      <dependency>
+	<groupId>args4j</groupId>
+	<artifactId>args4j</artifactId>
+	<version>2.0.16</version>
+      </dependency>
+      <dependency>
+       <groupId>caja</groupId>
+       <artifactId>caja</artifactId>
+       <version>r5054</version>
       </dependency>
 
       <dependency>
@@ -975,6 +1001,11 @@
       </dependency>
       <dependency>
         <groupId>org.gatein.shindig</groupId>
+        <artifactId>shindig-extras</artifactId>
+        <version>${org.shindig.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.gatein.shindig</groupId>
         <artifactId>shindig-common</artifactId>
         <version>${org.shindig.version}</version>
       </dependency>
@@ -984,7 +1015,6 @@
         <classifier>tests</classifier>
         <version>${org.shindig.version}</version>
       </dependency>
-
       <dependency>
         <groupId>org.gatein.shindig</groupId>
         <artifactId>shindig-social-api</artifactId>

@@ -26,7 +26,7 @@
 //  change
 //		{"gadgets.container" : ["default"],
 //  to
-//		﻿{"gadgets.container" : ["myContainer"],
+//		{"gadgets.container" : ["myContainer"],
 // And make your changes that you need to myContainer.js.
 // Just make sure on the iframe URL you specify &container=myContainer
 // for it to use that config.
@@ -44,9 +44,11 @@
 
 // Container must be an array; this allows multiple containers
 // to share configuration.
+
+// Note that you can embed values directly or you can choose to have values read from a file on disk
+// or read from the classpath ("foo-key" : "file:///foo-file.txt" || "foo-key" : "res://foo-file.txt")
 // TODO: Move out accel container config into a separate accel.js file.
-// TODO : remove "" container
-{"gadgets.container" : ["default", "portal", ""],
+{"gadgets.container" : ["default", "portal"],
 
 // Set of regular expressions to validate the parent parameter. This is
 // necessary to support situations where you want a single container to support
@@ -56,12 +58,6 @@
 // value matching this set will return a 404 error.
 "gadgets.parent" : null,
 
-// Should all gadgets be forced on to a locked domain?
-"gadgets.lockedDomainRequired" : false,
-
-// DNS domain on which gadgets should render.
-"gadgets.lockedDomainSuffix" : "-a.example.com:8080",
-
 // Origins for CORS requests and/or Referer validation
 // Indicate a set of origins or an entry with * to indicate that all origins are allowed
 "gadgets.parentOrigins" : ["*"],
@@ -70,58 +66,94 @@
 // iframeBaseUri will automatically have the host inserted
 // if locked domain is enabled and the implementation supports it.
 // query parameters will be added.
-"gadgets.iframeBaseUri" : "/eXoGadgetServer/gadgets/ifr",
-"gadgets.uri.iframe.basePath" : "/eXoGadgetServer/gadgets/ifr",
-
-// jsUriTemplate will have %host% and %js% substituted.
-// No locked domain special cases, but jsUriTemplate must
-// never conflict with a lockedDomainSuffix.
-"gadgets.jsUriTemplate" : "http://%host%/eXoGadgetServer/gadgets/js/%js%",
-
-//New configuration for iframeUri generation:
-"gadgets.uri.iframe.lockedDomainSuffix" :  "-a.example.com:8080",
-"gadgets.uri.iframe.unlockedDomain" : "http://%host%",
-"gadgets.uri.iframe.basePath" : "/eXoGadgetServer/gadgets/ifr",
-
+"gadgets.iframeBaseUri" : "${CONTEXT_ROOT}/gadgets/ifr",
+"gadgets.uri.iframe.basePath" : "${CONTEXT_ROOT}/gadgets/ifr",
 
 // Callback URL.  Scheme relative URL for easy switch between https/http.
-"gadgets.uri.oauth.callbackTemplate" : "//%host%/eXoGadgetServer/gadgets/oauthcallback",
-
-// Use an insecure security token by default
-"gadgets.securityTokenType" : "secure",
-"gadgets.securityTokenKeyFile" : "key.txt",
+"gadgets.uri.oauth.callbackTemplate" : "//%host%${CONTEXT_ROOT}/gadgets/oauthcallback",
 
 // Config param to load Opensocial data for social
 // preloads in data pipelining.  %host% will be
 // substituted with the current host.
-"gadgets.osDataUri" : "http://%host%/social/rpc",
+"gadgets.osDataUri" : "//%host%/social/rpc",
+
+// Use an insecure security token by default
+//"gadgets.securityTokenType" : "secure",
+
+// Uncomment the securityTokenType and one of the securityTokenKey's to switch to a secure version.
+// Note that you can choose to use an embedded key, a filesystem reference or a classpath reference.
+// The best way to generate a key is to do something like this:
+// dd if=/dev/random bs=32 count=1 | openssl base64
+//
+"gadgets.securityTokenType" : "secure",
+"gadgets.securityTokenKey" : "key.txt",
+//"gadgets.securityTokenKey" : "file:///path/to/key/file.txt",
+//"gadgets.securityTokenKey" : "res://some-file-on-the-classpath.txt",
 
 "gadgets.signingKeyFile" : "oauthkey.pem",
 "gadgets.signingKeyName" : "exokey",
 
 "gadgets.signedFetchDomain" : "eXo",
 
-"gadgets.content-rewrite" : {
-  "include-urls": ".*",
-  "exclude-urls": "",
-  "include-tags": ["link", "script", "embed", "img", "style"],
-  "expires": "86400",
-  "proxy-url": "/eXoGadgetServer/gadgets/proxy?url=",
-  "concat-url": "/eXoGadgetServer/gadgets/concat?"
-},
+// OS 2.0 Gadget DOCTYPE: used in Gadgets with @specificationVersion 2.0 or greater and
+// quirksmode on Gadget has not been set.
+"gadgets.doctype_qname" : "HTML",  //HTML5 doctype
+"gadgets.doctype_pubid" : "",
+"gadgets.doctype_sysid" : "",
+
+// In a locked domain config, these can remain as-is in order to have requests encountered use the
+// host they came in on (locked host).
+"default.domain.locked.client" : "%host%",
+"default.domain.locked.server" : "%authority%",
+
+// IMPORTANT: EDITME: In a locked domain configuration, these should be changed to explicit values of
+// your unlocked host. You should not use %host% or %authority% replacements or these defaults in a
+// locked domain deployment.
+// Both of these values will likely be identical in a real locked domain deployment.
+"default.domain.unlocked.client" : "${Cur['default.domain.locked.client']}",
+"default.domain.unlocked.server" : "${Cur['default.domain.locked.server']}",
+
+// You can change this if you wish unlocked gadgets to render on a different domain from the default.
+"gadgets.uri.iframe.unlockedDomain" : "http://%authority%", // DNS domain on which *unlocked* gadgets should render.
+
+// IMPORTANT: EDITME: In a locked domain configuration, this suffix should be provided explicitly.
+// It is recommended that it be a separate top-level-domain (TLD) than the unlocked TLD.
+// You should not use replacement here (avoid %authority%)
+// Example: unlockedDomain="shindig.example.com" lockedDomainSuffix="-locked.example-gadgets.com"
+"gadgets.uri.iframe.lockedDomainSuffix" : "-a.example.com:8080", // DNS domain on which *locked* gadgets should render.
+
+// Should all gadgets be forced on to a locked domain?
+"gadgets.uri.iframe.lockedDomainRequired" : false,
+
+// The permitted domain where the render request is sent from. For examle: ["www.hostA.com", "www.hostB.com"]
+// Empty means all domains are permitted.
+"shindig.locked-domain.permittedRefererDomains" : [],
 
 // Default Js Uri config: also must be overridden.
-"gadgets.uri.js.host" : "//%host%/",
-"gadgets.uri.js.path" : "/eXoGadgetServer/gadgets/js",
+// gadgets.uri.js.host should be protocol relative.
+"gadgets.uri.js.host" : "//%authority%/", // Use unlocked host for better caching.
+
+// If you change the js.path you will need to define window.__CONTAINER_SCRIPT_ID prior to loading the <script>
+// tag for container JavaScript into the DOM.
+"gadgets.uri.js.path" : "${CONTEXT_ROOT}/gadgets/js",
 
 // Default concat Uri config; used for testing.
-"gadgets.uri.concat.host" : "%host%",
-"gadgets.uri.concat.path" : "/eXoGadgetServer/gadgets/concat",
+"gadgets.uri.concat.host" : "%authority%", // Use unlocked host for better caching.
+"gadgets.uri.concat.path" : "${CONTEXT_ROOT}/gadgets/concat",
 "gadgets.uri.concat.js.splitToken" : "false",
 
 // Default proxy Uri config; used for testing.
-"gadgets.uri.proxy.host" : "%host%",
-"gadgets.uri.proxy.path" : "/eXoGadgetServer/gadgets/proxy",
+"gadgets.uri.proxy.host" : "%authority%", // Use unlocked host for better caching.
+"gadgets.uri.proxy.path" : "${CONTEXT_ROOT}/gadgets/proxy",
+
+// Enables/Disables feature administration
+"gadgets.admin.enableFeatureAdministration" : false,
+
+// Enables whitelist checks
+"gadgets.admin.enableGadgetWhitelist" : false,
+
+// Max post size for posts through the makeRequest proxy.
+"gadgets.jsonProxyUrl.maxPostSize" : 5242880, // 5 MiB
 
 // This config data will be passed down to javascript. Please
 // configure your object using the feature name rather than
@@ -131,19 +163,28 @@
 // See individual feature.xml files for configuration details.
 "gadgets.features" : {
   "core.io" : {
-    // Note: /proxy is an open proxy. Be careful how you expose this!
-    "proxyUrl" : "//%host%/eXoGadgetServer/gadgets/proxy?container=default&refresh=%refresh%&url=%url%%rewriteMime%",
-    "jsonProxyUrl" : "//%host%/eXoGadgetServer/gadgets/makeRequest"
+    // Note: ${Cur['gadgets.uri.proxy.path']} is an open proxy. Be careful how you expose this!
+    // Note: These urls should be protocol relative (start with //)
+    "proxyUrl" : "//%host%${CONTEXT_ROOT}/gadgets/proxy?container=default&refresh=%refresh%&url=%url%%rewriteMime%",
+    "jsonProxyUrl" : "//%host%${CONTEXT_ROOT}/gadgets/makeRequest",
+    // Note: this setting MUST be supplied in every container config object, as there is no default if it is not supplied.
+    "unparseableCruft" : "throw 1; < don't be evil' >",
+
+    // This variable is needed during the config init to parse config augmentation
+    "jsPath" : "${Cur['gadgets.uri.js.path']}",
+
+    // interval in milliseconds used to poll xhr request for the readyState
+    "xhrPollIntervalMs" : 50
   },
   "views" : {
     "home" : {
-      "isOnlyVisible" : false,
-      "urlTemplate" : "http://%host%/eXoGadgetServer/gadgets/home?{var}",
-      "aliases": ["DASHBOARD", "default"]
-    },
+	  "isOnlyVisible" : false,
+	  "urlTemplate" : "http://%host%${CONTEXT_ROOT}/gadgets/home?{var}",
+	  "aliases": ["DASHBOARD", "default"]
+	},
     "canvas" : {
       "isOnlyVisible" : true,
-      "urlTemplate" : "http://%host%/eXoGadgetServer/gadgets/canvas?{var}",
+      "urlTemplate" : "http://%host%${CONTEXT_ROOT}/gadgets/canvas?{var}",
       "aliases" : ["FULL_PAGE"]
     }
   },
@@ -206,25 +247,29 @@
       "border-collapse: separate;",
       "border-spacing: 0px;",
       "padding: 1px 0px;",
-    "}",
-    ".mmlib_xlink {",
-      "font: normal 1.1em arial,sans-serif;",
-      "font-weight: bold;",
-      "color: #0000cc;",
-      "cursor: pointer;",
-    "}"
-   ]
+      "}",
+      ".mmlib_xlink {",
+        "font: normal 1.1em arial,sans-serif;",
+        "font-weight: bold;",
+        "color: #0000cc;",
+        "cursor: pointer;",
+      "}"
+    ]
   },
   "rpc" : {
     // Path to the relay file. Automatically appended to the parent
-    /// parameter if it passes input validation and is not null.
+    // parameter if it passes input validation and is not null.
     // This should never be on the same host in a production environment!
     // Only use this for TESTING!
-    "parentRelayUrl" : "/eXoGadgetServer/gadgets/files/container/rpc_relay.html",
+    "parentRelayUrl" : "${CONTEXT_ROOT}/gadgets/files/container/rpc_relay.html",
 
     // If true, this will use the legacy ifpc wire format when making rpc
     // requests.
-    "useLegacyProtocol" : false
+    "useLegacyProtocol" : false,
+
+    // Path to the cross-domain enabling SWF for rpc's Flash transport.
+    "commSwf": "/xpc.swf",
+    "passReferrer": "c2p:query"
   },
   // Skin defaults
   "skins" : {
@@ -240,18 +285,19 @@
   "opensocial" : {
     // Path to fetch opensocial data from
     // Must be on the same domain as the gadget rendering server
-    "path" : "http://%host%/social/rpc",
+    "path" : "//%host%/social/rpc",
     // Path to issue invalidate calls
-    "invalidatePath" : "http://%host%/social/rpc",
+    "invalidatePath" : "//%host%/social/rpc",
     "domain" : "shindig",
     "enableCaja" : false,
     "supportedFields" : {
        "person" : ["id", {"name" : ["familyName", "givenName", "unstructured"]}, "thumbnailUrl", "profileUrl"],
-       "activity" : ["appId", "body", "bodyId", "externalId", "id", "mediaItems", "postedTime", "priority", 
+       "group" : ["id", "title", "description"],
+       "activity" : ["appId", "body", "bodyId", "externalId", "id", "mediaItems", "postedTime", "priority",
                      "streamFaviconUrl", "streamSourceUrl", "streamTitle", "streamUrl", "templateParams", "title",
                      "url", "userId"],
-       "activityEntry" : ["icon", "postedTime", "actor", "verb", "object", "target", "generator", "provider", "title",
-                          "body", "standardLinks", "to", "cc", "bcc"],
+       "activityEntry" : ["actor", "content", "generator", "icon", "id", "object", "published", "provider", "target",
+                          "title", "updated", "url", "verb", "openSocial", "extensions"],
        "album" : ["id", "thumbnailUrl", "title", "description", "location", "ownerId"],
        "mediaItem" : ["album_id", "created", "description", "duration", "file_size", "id", "language", "last_updated",
                       "location", "mime_type", "num_comments", "num_views", "num_votes", "rating", "start_time",
@@ -276,5 +322,18 @@
     // OSML library resource.  Can be set to null or the empty string to disable OSML
     // for a container.
     "library": "config/OSML_library.xml"
+  },
+  "shindig-container": {
+    "serverBase": "${CONTEXT_ROOT}/gadgets/"
+  },
+  "container" : {
+    "relayPath": "${CONTEXT_ROOT}/gadgets/files/container/rpc_relay.html",
+
+    //Enables/Disables the RPC arbitrator functionality in the common container
+    "enableRpcArbitration": false,
+
+    // This variable is needed during the container feature init.
+    "jsPath" : "${Cur['gadgets.uri.js.path']}"
   }
-}}
+}
+}
