@@ -71,6 +71,10 @@
       }
       this.trigger('eXo.portal.switchMode', this.model.get('editMode'), this);
     },
+    
+    isEditing : function () {
+      return this.$el.hasClass('LAYOUT-EDITION');
+    },
 
     getComposerView: function() {
       return this.composerView;

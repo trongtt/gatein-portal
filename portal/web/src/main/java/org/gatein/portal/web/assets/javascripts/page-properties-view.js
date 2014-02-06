@@ -1,4 +1,23 @@
-(function(Backbone, $, _, editorView){
+(function(Backbone, $, _, editorView) {
+  
+  var PageInfo = Backbone.Model.extend({
+    
+    initAttributes : function() {
+      if (editorView.getPageView() != undefined) {
+        var pageModel = editorView.getPageView().model;
+        this.attributes = _.clone(pageModel.attributes);
+      }
+    },
+    
+    toPageModel : function () {
+      if (editorView.getPageView() != undefined) {
+        var pageModel = editorView.getPageView().model;
+        pageModel.set(this.attributes);
+        return pageModel;
+      }
+      return undefined;
+    }
+  });
   
   var PagePropertiesModal = Backbone.View.extend({
     events : { 
@@ -8,6 +27,10 @@
       'change input[type="checkbox"].everyone': "changePermission",
       "submit form.form-permission": "addPermission",
       "click li.permission": "removePermission"
+    },
+    
+    initialize : function () {
+      this.model = new PageInfo();
     },
 
     //TODO: need to refactor this
@@ -24,6 +47,8 @@
     },
     
     render : function() {
+      this.model.initAttributes();
+
       var _this = this;
       var editMode = editorView.model.get('editMode');
       if (editMode == editorView.EditorState.EDIT_NEW_PAGE) {
@@ -34,28 +59,26 @@
             var template = $("#page-properties-modal-template").html();
             var html = _.template(template, {parentLinks: data.parentLinks});
             _this.$el.find('.modal-body').html(html);
+            _this.bindingForm();
+            
+            //TODO: Need to re-factory
             if (editorView.getPageView() != undefined) {
               var pageModel = editorView.getPageView().model;
-              $(".modal-body input[name='pageName']").val(pageModel.get('pageName'));
-              $(".modal-body input[name='pageDisplayName']").val(pageModel.get('pageDisplayName'));
-              $(".modal-body select[name='parentLink']").val(pageModel.get('parentLink'));
-              $(".modal-body select[name='factoryId']").val(pageModel.get('factoryId'));
               _this.accessPermissions = pageModel.get('accessPermissions');
               _this.editPermissions = pageModel.get('editPermissions');
             }
+            //
           }
         });
       } else if (editMode == editorView.EditorState.EDIT_CURRENT_PAGE) {
         var template = $("#page-properties-modal-template").html();
         var pageModel = editorView.getPageView().model;
         var html = _.template(template, {parentLinks: [pageModel.get('parentLink')]});
-        _this.$el.find('.modal-body').html(html);
-        $(".modal-body input[name='pageName']").val(pageModel.get('pageName')).prop('disabled', true);
-        $(".modal-body input[name='pageDisplayName']").val(pageModel.get('pageDisplayName'));
-        $(".modal-body select[name='parentLink']").val(pageModel.get('parentLink')).prop('disabled', true);
-        $(".modal-body select[name='factoryId']").val(pageModel.get('factoryId'));
-        _this.accessPermissions = pageModel.get('accessPermissions');
-        _this.editPermissions = pageModel.get('editPermissions');
+        this.$el.find('.modal-body').html(html);
+        this.bindingForm();
+        //TODO: Need to re-factory
+        this.accessPermissions = pageModel.get('accessPermissions');
+        this.editPermissions = pageModel.get('editPermissions');
       }
 
       //Need load All group and membershipType
@@ -84,44 +107,57 @@
       });
     },
     
-    bindToPageModel : function(pageModel) {
-      pageModel.set("id", "newpage"); 
-      pageModel.set("factoryId", $(".modal-body select[name='factoryId']").val()); 
-      pageModel.set("pageKey", "portal::classic::" + $(".modal-body input[name='pageName']").val()); 
-      pageModel.set("pageName", $(".modal-body input[name='pageName']").val());
-      pageModel.set("pageDisplayName", $(".modal-body input[name='pageDisplayName']").val());
-      pageModel.set("parentLink", $(".modal-body select[name='parentLink']").val());
+    bindingForm : function (editMode) {
+      this.$el.find("input[name='pageName']").val(this.model.get('pageName')).prop('disabled', (editMode == editorView.EditorState.EDIT_CURRENT_PAGE));
+      this.$el.find("input[name='pageDisplayName']").val(this.model.get('pageDisplayName'));
+      this.$el.find("select[name='parentLink']").val(this.model.get('parentLink')).prop('disabled', (editMode == editorView.EditorState.EDIT_CURRENT_PAGE));
+      this.$el.find("select[name='factoryId']").val(this.model.get('factoryId'));
     },
-
-    bindPermissionToPageModel: function(pageModel) {
-      //Access permission
+    
+    initPageInfo : function () {
+      this.model.set("id", "newpage"); 
+      this.model.set("factoryId", $(".modal-body select[name='factoryId']").val()); 
+      this.model.set("pageKey", "portal::classic::" + $(".modal-body input[name='pageName']").val()); 
+      this.model.set("pageName", $(".modal-body input[name='pageName']").val());
+      this.model.set("pageDisplayName", $(".modal-body input[name='pageDisplayName']").val());
+      this.model.set("parentLink", $(".modal-body select[name='parentLink']").val());
+      this.setPermissions();
+    },
+    
+    updatePageInfo : function () {
+      this.model.set('pageDisplayName', $(".modal-body input[name='pageDisplayName']").val());
+      this.model.set('factoryId', $(".modal-body select[name='factoryId']").val());
+      this.setPermissions();
+    },
+    
+    setPermissions : function () {
+     //Access permission
       if(this.$el.find('input[name="accessPermission"]').is(":checked")) {
-        pageModel.set('accessPermissions', ['Everyone']);
+        this.model.set('accessPermissions', ['Everyone']);
       } else {
-        pageModel.set('accessPermissions', this.accessPermissions);
+        this.model.set('accessPermissions', this.accessPermissions);
       }
 
       //Edit permission
       if(this.$el.find('input[name="editPermission"]').is(":checked")) {
-        pageModel.set('editPermissions', ['Everyone']);
+        this.model.set('editPermissions', ['Everyone']);
       } else {
-        pageModel.set('editPermissions', this.editPermissions);
+        this.model.set('editPermissions', this.editPermissions);
       }
     },
-    
+
     nextStep : function() {
-      var _this = this;
       var editMode = editorView.model.get('editMode');
       if (editMode == editorView.EditorState.EDIT_CURRENT_PAGE) {
         var pageModel = editorView.getPageView().model;
-        pageModel.set('pageDisplayName', $(".modal-body input[name='pageDisplayName']").val());
-        pageModel.set('factoryId', $(".modal-body select[name='factoryId']").val());
-        _this.bindPermissionToPageModel(pageModel);
-        editorView.getComposerView().setFactoryId();
+        this.updatePageInfo();
+        this.model.toPageModel();
         this.$el.modal('hide');
+        editorView.getComposerView().setFactoryId();
       } else if (editMode == editorView.EditorState.EDIT_NEW_PAGE) {
-        var pageNameInput = _this.$el.find("input[name='pageName']");
-        if (_this.verifyPageName(pageNameInput)) {
+        var pageNameInput = this.$el.find("input[name='pageName']");
+        if (this.verifyPageName(pageNameInput)) {
+          var _this = this;
           $.ajax({
             url : _this.$el.attr('data-checkpage-url'),
             dataType : "json",
@@ -134,24 +170,26 @@
                 $(pageNameInput).select();
               } else {
                 require(['layout-view', 'composer-view'], function(LayoutView, ComposerView){
-                  editorView.switchMode(LayoutView, ComposerView);
-                  var pageView = editorView.getPageView();
-                  var pageModel = pageView.model;
-                  _this.bindToPageModel(pageModel);
-                  _this.bindPermissionToPageModel(pageModel);
-                  //clear apps
-                  var containers = pageModel.getChildren();
-                  $(containers).each(function() {
-                    if (!this.isEmpty()) {
-                      var container = this;
-                      var apps = this.getChildren();
-                      $(apps).each(function() {
-                        container.removeChild(this);
-                      });
-                    }
-                  });
-                  //
-                  $('#pagePropertiesModal').modal('hide');
+                  _this.initPageInfo();
+                  if (!editorView.isEditing()) {
+                    editorView.switchMode(LayoutView, ComposerView);
+                    //clear apps
+                    var pageModel = editorView.getPageView().model;
+                    var containers = pageModel.getChildren();
+                    $(containers).each(function() {
+                      if (!this.isEmpty()) {
+                        var container = this;
+                        var apps = this.getChildren();
+                        $(apps).each(function() {
+                          container.removeChild(this);
+                        });
+                      }
+                    });
+                  }
+                  
+                  _this.model.toPageModel();
+                  _this.$el.modal('hide');
+                  editorView.getComposerView().setFactoryId();
                 });
               }
             }
