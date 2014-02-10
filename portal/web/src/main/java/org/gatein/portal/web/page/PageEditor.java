@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -46,6 +47,7 @@ import org.gatein.portal.content.ContentType;
 import org.gatein.portal.content.ProviderRegistry;
 import org.gatein.portal.content.Result;
 import org.gatein.portal.mop.description.DescriptionService;
+import org.gatein.portal.mop.description.DescriptionState;
 import org.gatein.portal.mop.hierarchy.GenericScope;
 import org.gatein.portal.mop.hierarchy.NodeContext;
 import org.gatein.portal.mop.hierarchy.Scope;
@@ -195,16 +197,16 @@ public class PageEditor {
         //
         NodeContext<?, NodeState> pageNode = root.get(pageKey.getName());
         if (pageNode == null) {
-            pageNode = current.add(null, pageKey.getName(), new NodeState.Builder().label(pageDisplayName).pageRef(pageKey).build());
-            navigationService.saveNode(pageNode, null);
+            pageNode = current.add(null, pageKey.getName(), new NodeState.Builder().pageRef(pageKey).build());
         } else {
             NodeState sate = pageNode.getState();
             pageNode.setState(new NodeState.Builder(sate).pageRef(pageKey).build());
-            navigationService.saveNode(pageNode, null);
         }
+        navigationService.saveNode(pageNode, null);
+        descriptionService.saveDescription(pageNode.getId(), userContext.getLocale(), new DescriptionState(pageDisplayName, null));
         org.gatein.portal.mop.page.PageContext page = new org.gatein.portal.mop.page.PageContext(
                 pageKey, 
-                new PageState.Builder().displayName(pageDisplayName).factoryId(factoryId).build());
+                new PageState.Builder().factoryId(factoryId).displayName(pageDisplayName).build());
 
         pageService.savePage(page);
         return page;
@@ -215,14 +217,16 @@ public class PageEditor {
     public Response saveLayout(RequestContext context, @Param(name = "javax.portlet.layoutid") String layoutId) throws Exception {
         JSONObject requestData = getRequestData(context);
         JSON result = new JSON();
+        
+        PageKey pageKey = PageKey.parse(requestData.getString("pageKey"));
+        String pageDisplayName = requestData.getString("pageDisplayName");
+        String parent = requestData.getString("parentLink");
+        String factoryId = requestData.getString("factoryId");
+        org.gatein.portal.mop.page.PageContext pageContext = createPage(pageKey, pageDisplayName, parent, factoryId, Request.getCurrent().getUserContext());
+        
         if ("newpage".equals(layoutId)) {
-            PageKey pageKey = PageKey.parse(requestData.getString("pageKey"));
-            String pageDisplayName = requestData.getString("pageDisplayName");
-            String parent = requestData.getString("parentLink");
-            String factoryId = requestData.getString("factoryId");
-            org.gatein.portal.mop.page.PageContext pageContext = createPage(pageKey, pageDisplayName, parent, factoryId, Request.getCurrent().getUserContext());
-            layoutId = pageContext.getLayoutId();
             result.set("redirect", parent + "/" + pageKey.getName());
+            layoutId = pageContext.getLayoutId();
         }
         
         NodeContext<JSONObject, ElementState> pageStructure = buildPageStructure(layoutId, requestData);

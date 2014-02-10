@@ -59,7 +59,7 @@
             var template = $("#page-properties-modal-template").html();
             var html = _.template(template, {parentLinks: data.parentLinks});
             _this.$el.find('.modal-body').html(html);
-            _this.bindingForm();
+            _this.bindingForm(editMode);
             
             //TODO: Need to re-factory
             if (editorView.getPageView() != undefined) {
@@ -75,7 +75,7 @@
         var pageModel = editorView.getPageView().model;
         var html = _.template(template, {parentLinks: [pageModel.get('parentLink')]});
         this.$el.find('.modal-body').html(html);
-        this.bindingForm();
+        this.bindingForm(editMode);
         //TODO: Need to re-factory
         this.accessPermissions = pageModel.get('accessPermissions');
         this.editPermissions = pageModel.get('editPermissions');

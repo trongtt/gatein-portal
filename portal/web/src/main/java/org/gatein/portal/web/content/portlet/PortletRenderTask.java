@@ -103,7 +103,7 @@ class PortletRenderTask extends RenderTask {
             invocation.setPortalContext(new AbstractPortalContext());
             invocation.setInstanceContext(new AbstractInstanceContext(windowContext.getName(), AccessMode.READ_ONLY));
             invocation.setWindowContext(new AbstractWindowContext(windowContext.getName()));
-            invocation.setUserContext(new AbstractUserContext());
+            invocation.setUserContext(new AbstractUserContext(servletReq));
             invocation.setSecurityContext(new AbstractSecurityContext(servletReq));
             invocation.setRequest(servletReq);
             invocation.setResponse(servletResp);
