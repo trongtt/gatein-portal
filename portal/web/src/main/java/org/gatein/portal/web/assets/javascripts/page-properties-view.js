@@ -1,18 +1,85 @@
 (function(Backbone, $, _, editorView) {
-  
+
   var PageInfo = Backbone.Model.extend({
-    
-    initAttributes : function() {
-      if (editorView.getPageView() != undefined) {
-        var pageModel = editorView.getPageView().model;
-        this.attributes = _.clone(pageModel.attributes);
-      }
+
+    defaults: {
+      everyone: {access: true, edit: false}
     },
-    
+
+    initialize: function(attributes, options) {
+
+      var attributes = attributes || {};
+
+      //Process everyone permission
+      attributes.everyone = {access: true, edit: false};
+      if(attributes.accessPermissions) {
+        if(attributes.accessPermissions.length == 0 || (attributes.accessPermissions.length == 1 && attributes.accessPermissions[0] === 'Everyone')) {
+          attributes.everyone.access = true;
+        } else {
+          attributes.everyone.access = false;
+        }
+        attributes.accessPermissions = _.without(attributes.accessPermissions, 'Everyone');
+      }
+
+      if(attributes.editPermissions && attributes.editPermissions.length == 1 && attributes.editPermissions[0] === 'Everyone') {
+        attributes.everyone.edit = true;
+        attributes.editPermissions = _.without(attributes.editPermissions, 'Everyone');
+      }
+
+      this.set(attributes, options);
+    },
+
+    setEveryonePermission: function(attr, val) {
+      var attr = attr === 'accessPermission' ? 'access' : 'edit';
+      var everyone = this.get('everyone');
+      everyone[attr] = val;
+    },
+    addPermission: function(attr, permission) {
+      if(!attr || (attr != 'accessPermissions' && attr != 'editPermissions')) {
+        return false;
+      }
+
+      var permissions = this.get(attr) || [];
+      if(permission && !_.contains(permissions, permission)) {
+        permissions.push(permission);
+        this.set(attr, permissions);
+        return true;
+      }
+
+      return false;
+    },
+    removePermission: function(attr, permission) {
+      if(!attr || (attr != 'accessPermissions' && attr != 'editPermissions')) {
+        return false;
+      }
+
+      var permissions = this.get(attr) || [];
+      if(permission && _.contains(permissions, permission)) {
+        _.without(permissions, permission);
+        this.set(attr, permissions);
+        return true;
+      }
+
+      return false;
+    },
+
     toPageModel : function () {
+      //Process permission before bind
+      var everyone = this.get('everyone');
+      if(everyone.access) {
+        this.set('accessPermissions', ['Everyone']);
+      }
+      if(everyone.edit) {
+        this.set('editPermissions', ['Everyone']);
+      }
+
       if (editorView.getPageView() != undefined) {
         var pageModel = editorView.getPageView().model;
-        pageModel.set(this.attributes);
+
+        var attrs = _.clone(this.attributes);
+        delete attrs.everyone;
+        pageModel.set(attrs);
+
         return pageModel;
       }
       return undefined;
@@ -30,12 +97,12 @@
     },
     
     initialize : function () {
-      this.model = new PageInfo();
+      var attrs = {};
+      if(editorView.getPageView() != undefined) {
+        attrs = _.clone(editorView.getPageView().model.attributes);
+      }
+      this.model = new PageInfo(attrs);
     },
-
-    //TODO: need to refactor this
-    accessPermissions: [],
-    editPermissions: [],
     
     cancel : function() {
       this.$el.removeData('modal');
@@ -47,10 +114,10 @@
     },
     
     render : function() {
-      this.model.initAttributes();
-
       var _this = this;
       var editMode = editorView.model.get('editMode');
+
+      //How to render page properties
       if (editMode == editorView.EditorState.EDIT_NEW_PAGE) {
         $.ajax({
           url : this.$el.attr('data-parentLinks'),
@@ -59,15 +126,7 @@
             var template = $("#page-properties-modal-template").html();
             var html = _.template(template, {parentLinks: data.parentLinks});
             _this.$el.find('.modal-body').html(html);
-            _this.bindingForm(editMode);
-            
-            //TODO: Need to re-factory
-            if (editorView.getPageView() != undefined) {
-              var pageModel = editorView.getPageView().model;
-              _this.accessPermissions = pageModel.get('accessPermissions');
-              _this.editPermissions = pageModel.get('editPermissions');
-            }
-            //
+            _this.bindingForm();
           }
         });
       } else if (editMode == editorView.EditorState.EDIT_CURRENT_PAGE) {
@@ -75,21 +134,10 @@
         var pageModel = editorView.getPageView().model;
         var html = _.template(template, {parentLinks: [pageModel.get('parentLink')]});
         this.$el.find('.modal-body').html(html);
-        this.bindingForm(editMode);
-        //TODO: Need to re-factory
-        this.accessPermissions = pageModel.get('accessPermissions');
-        this.editPermissions = pageModel.get('editPermissions');
+        this.bindingForm();
       }
 
-      //Need load All group and membershipType
-      var everyone = {
-        //Default everyone can access to page
-        access: (this.accessPermissions.length == 1 && this.accessPermissions[0] == 'Everyone') || (this.accessPermissions.length == 0),
-        edit: (this.editPermissions.length == 1 && this.editPermissions[0] == 'Everyone') || (this.editPermissions.length == 0)
-      };
-      this.accessPermissions = _.without(this.accessPermissions, 'Everyone');
-      this.editPermissions = _.without(this.editPermissions, 'Everyone');
-
+      //Tab permissions
       $.ajax({
         url: this.$el.attr('data-allGroupAndMembershipType'),
         dataType: 'json',
@@ -98,9 +146,9 @@
           var html = _.template(template, {
             groups: data.groups,
             membershipTypes: data.membershipTypes,
-            accessPermissions: _this.accessPermissions,
-            editPermissions: _this.editPermissions,
-            everyone: everyone
+            accessPermissions: _this.model.get('accessPermissions'),
+            editPermissions: _this.model.get('editPermissions'),
+            everyone: _this.model.get('everyone')
           });
           _this.$el.find('.modal-permissions').html(html);
         }
@@ -108,6 +156,7 @@
     },
     
     bindingForm : function (editMode) {
+      var editMode = editorView.model.get('editMode');
       this.$el.find("input[name='pageName']").val(this.model.get('pageName')).prop('disabled', (editMode == editorView.EditorState.EDIT_CURRENT_PAGE));
       this.$el.find("input[name='pageDisplayName']").val(this.model.get('pageDisplayName'));
       this.$el.find("select[name='parentLink']").val(this.model.get('parentLink')).prop('disabled', (editMode == editorView.EditorState.EDIT_CURRENT_PAGE));
@@ -121,29 +170,11 @@
       this.model.set("pageName", $(".modal-body input[name='pageName']").val());
       this.model.set("pageDisplayName", $(".modal-body input[name='pageDisplayName']").val());
       this.model.set("parentLink", $(".modal-body select[name='parentLink']").val());
-      this.setPermissions();
     },
     
     updatePageInfo : function () {
       this.model.set('pageDisplayName', $(".modal-body input[name='pageDisplayName']").val());
       this.model.set('factoryId', $(".modal-body select[name='factoryId']").val());
-      this.setPermissions();
-    },
-    
-    setPermissions : function () {
-     //Access permission
-      if(this.$el.find('input[name="accessPermission"]').is(":checked")) {
-        this.model.set('accessPermissions', ['Everyone']);
-      } else {
-        this.model.set('accessPermissions', this.accessPermissions);
-      }
-
-      //Edit permission
-      if(this.$el.find('input[name="editPermission"]').is(":checked")) {
-        this.model.set('editPermissions', ['Everyone']);
-      } else {
-        this.model.set('editPermissions', this.editPermissions);
-      }
     },
 
     nextStep : function() {
@@ -202,6 +233,7 @@
       var regex = new RegExp('^[a-zA-Z0-9._-]{3,120}$');
       var pageName = $(input).val();
       if (!pageName) {
+        this.message("Page name is required!");
         setTimeout(function(){
           $(input).select();
         }, 0);
@@ -221,8 +253,8 @@
     message : function(msg) {
       var alertBox = $("<div class='alert alert-error'></div>")
       alertBox.text(msg);
-      this.$el.find('.modal-body .alert').remove();
-      this.$el.find('.modal-body').prepend(alertBox);
+      this.$el.find('.modal-messages .alert').remove();
+      this.$el.find('.modal-messages').prepend(alertBox);
     },
 
     changePermissionTab: function(e) {
@@ -243,6 +275,7 @@
 
     changePermission: function(e) {
       var $target = $(e.target);
+      this.model.setEveryonePermission($target.attr('name'), $target.is(':checked'));
       var $permissions = $target.closest('div.row-permissions').find('div.permissions');
       $permissions.toggleClass('hide');
     },
@@ -260,17 +293,8 @@
       }
 
       var permission = membership + ":" + group;
-      //Unique
-      var existing = true;
-      if($form.attr('name') == 'accessPermission' && !_.contains(this.accessPermissions, permission)) {
-        existing = false;
-        this.accessPermissions.push(permission);
-      } else if($form.attr('name') == 'editPermission' && !_.contains(this.editPermissions, permission)) {
-        existing = false;
-        this.editPermissions.push(permission);
-      }
-
-      if(!existing) {
+      var permissionAttr = $form.attr('name');
+      if(this.model.addPermission(permissionAttr, permission)) {
         var $permission = $('<li class="permission">' + permission + '</li>')
         $permissions.find('ul.list-permissions').append($permission);
       }
@@ -283,14 +307,10 @@
       var perm = $permission.html();
 
       var $form = $permission.closest("div.permissions").find('form.form-permission');
-      if($form.attr('name') == 'accessPermission') {
-        this.accessPermissions = _.without(this.accessPermissions, perm);
-      } else if($form.attr('name') == 'editPermission') {
-        this.editPermissions = _.without(this.editPermissions, perm);
+      var permissionAttr = $form.attr('name');
+      if(this.model.removePermission(permissionAttr, perm)) {
+        $permission.remove();
       }
-
-
-      $permission.remove();
     }
   });
   
