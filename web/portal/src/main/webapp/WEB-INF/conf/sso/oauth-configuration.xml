@@ -31,6 +31,16 @@
     <key>org.gatein.security.oauth.spi.SocialNetworkService</key>
     <type>org.gatein.security.oauth.data.SocialNetworkServiceImpl</type>
   </component>
+  <component>
+    <key>org.gatein.security.oauth.spi.OAuthRegistrationServices</key>
+    <type>org.gatein.security.oauth.data.OAuthRegistrationServicesImpl</type>
+    <init-params>
+      <value-param>
+        <name>registerOnFly</name>
+        <value>${gatein.oauth.registraterOnFly}</value>
+      </value-param>
+    </init-params>
+  </component>
 
   <component>
     <key>org.gatein.security.oauth.spi.OAuthProviderTypeRegistry</key>

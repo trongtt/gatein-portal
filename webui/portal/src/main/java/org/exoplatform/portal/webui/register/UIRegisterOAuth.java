@@ -65,16 +65,26 @@ public class UIRegisterOAuth extends UIContainer {
     private static final String[] ACTIONS = { "SubscribeOAuth", "Reset", "Cancel" };
 
     static final String REGISTER_FORM_CONFIG_ID = "UIRegisterFormOAuth";
+    public static String INVITATION_FORM_CONFIG_ID = "UIOAuthInvitationForm";
 
     private final User portalUser;
+    private final User detectedUser;
 
     public UIRegisterOAuth() throws Exception {
+
+        AuthenticationRegistry authRegistry = getApplicationComponent(AuthenticationRegistry.class);
+        HttpServletRequest request = Util.getPortalRequestContext().getRequest();
+        detectedUser = (User)authRegistry.getAttributeOfClient(request, OAuthConstants.ATTRIBUTE_AUTHENTICATED_PORTAL_USER_DETECTED);
+
+        if(detectedUser != null) {
+            addChild(UIOAuthInvitationForm.class, null, null);
+        }
+
         addChild(UIRegisterForm.class, REGISTER_FORM_CONFIG_ID, REGISTER_FORM_CONFIG_ID);
 
         UIRegisterForm uiRegisterForm = getChild(UIRegisterForm.class);
         uiRegisterForm.setActions(ACTIONS);
 
-        AuthenticationRegistry authRegistry = getApplicationComponent(AuthenticationRegistry.class);
         User portalUser = (User)authRegistry.getAttributeOfClient(Util.getPortalRequestContext().getRequest(), OAuthConstants.ATTRIBUTE_AUTHENTICATED_PORTAL_USER);
         if (portalUser == null) {
             log.warn("portalUser from OAuth login is not available!");
@@ -84,6 +94,10 @@ public class UIRegisterOAuth extends UIContainer {
         }
 
         setupUserToRegisterForm();
+
+        if(detectedUser != null) {
+            uiRegisterForm.setRendered(false);
+        }
     }
 
     private void setupUserToRegisterForm() {

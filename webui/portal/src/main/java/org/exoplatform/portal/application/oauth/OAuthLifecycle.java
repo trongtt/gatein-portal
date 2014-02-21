@@ -26,7 +26,10 @@ package org.exoplatform.portal.application.oauth;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.exoplatform.container.ExoContainer;
+import org.exoplatform.container.component.RequestLifeCycle;
 import org.exoplatform.portal.application.PortalRequestContext;
+import org.exoplatform.portal.mop.SiteType;
 import org.exoplatform.portal.webui.register.UIRegisterOAuth;
 import org.exoplatform.portal.webui.util.Util;
 import org.exoplatform.portal.webui.workspace.UIMaskWorkspace;
@@ -37,12 +40,17 @@ import org.exoplatform.web.application.ApplicationLifecycle;
 import org.exoplatform.web.application.ApplicationMessage;
 import org.exoplatform.web.application.RequestFailure;
 import org.exoplatform.web.security.AuthenticationRegistry;
+import org.exoplatform.web.url.navigation.NavigationResource;
+import org.exoplatform.web.url.navigation.NodeURL;
 import org.exoplatform.webui.core.UIComponent;
-import org.gatein.security.oauth.exception.OAuthException;
 import org.gatein.common.logging.Logger;
 import org.gatein.common.logging.LoggerFactory;
 import org.gatein.security.oauth.common.OAuthConstants;
+import org.gatein.security.oauth.exception.OAuthException;
 import org.gatein.security.oauth.exception.OAuthExceptionCode;
+import org.gatein.security.oauth.spi.OAuthPrincipal;
+import org.gatein.security.oauth.spi.OAuthProviderType;
+import org.gatein.security.oauth.spi.OAuthRegistrationServices;
 
 /**
  * This lifecycle is used to update WebUI state based on OAuth events from Http filters
@@ -55,10 +63,12 @@ public class OAuthLifecycle implements ApplicationLifecycle<PortalRequestContext
     private final Logger log = LoggerFactory.getLogger(OAuthLifecycle.class);
 
     private AuthenticationRegistry authRegistry;
+    private OAuthRegistrationServices oauthRegistrationServices;
 
     @Override
     public void onInit(Application app) throws Exception {
         this.authRegistry = (AuthenticationRegistry)app.getApplicationServiceContainer().getComponentInstanceOfType(AuthenticationRegistry.class);
+        this.oauthRegistrationServices = app.getApplicationServiceContainer().getComponentInstanceOfType(OAuthRegistrationServices.class);
     }
 
     @Override
@@ -71,18 +81,51 @@ public class OAuthLifecycle implements ApplicationLifecycle<PortalRequestContext
 
         // Display Registration form after successful OAuth authentication.
         if (oauthAuthenticatedUser != null) {
-            UIMaskWorkspace uiMaskWS = uiApp.getChildById(UIPortalApplication.UI_MASK_WS_ID);
+            boolean showRegistrationForm = true;
 
-            if (log.isTraceEnabled()) {
-                log.trace("Found user, which has been authenticated through OAuth. Username is " + oauthAuthenticatedUser.getUserName());
+            //Process signup on fly
+            OAuthPrincipal principal = (OAuthPrincipal)authRegistry.getAttributeOfClient(httpRequest, OAuthConstants.ATTRIBUTE_AUTHENTICATED_OAUTH_PRINCIPAL);
+            OAuthProviderType providerType = principal.getOauthProviderType();
+            boolean isOnFly = oauthRegistrationServices != null && oauthRegistrationServices.isRegistrationOnFly(providerType);
+            if(isOnFly) {
+                User detectedUser = oauthRegistrationServices.detectGateInUser(httpRequest, principal);
+
+                //Create new user
+                if(detectedUser == null) {
+
+                    ExoContainer container = app.getApplicationServiceContainer();
+                    RequestLifeCycle.begin(container);
+                    User newUser = oauthRegistrationServices.createGateInUser(principal);
+                    RequestLifeCycle.end();
+
+                    if(newUser != null) {
+                        authRegistry.removeAttributeOfClient(httpRequest, OAuthConstants.ATTRIBUTE_AUTHENTICATED_PORTAL_USER);
+
+                        NodeURL createURL = context.createURL(NodeURL.TYPE);
+                        createURL.setResource(new NavigationResource(SiteType.PORTAL, context.getPortalOwner(), null));
+                        context.sendRedirect(createURL.toString());
+                        showRegistrationForm = false;
+                    }
+                } else {
+                    context.setAttribute("PORTAL_DETECTED_USER", detectedUser.getUserName() + "/" + detectedUser.getEmail());
+                    authRegistry.setAttributeOfClient(httpRequest, OAuthConstants.ATTRIBUTE_AUTHENTICATED_PORTAL_USER_DETECTED, detectedUser);
+                }
             }
 
-            if (!uiMaskWS.isShow() || !uiMaskWS.getUIComponent().getClass().equals(UIRegisterOAuth.class)) {
+            if(showRegistrationForm) {
+                UIMaskWorkspace uiMaskWS = uiApp.getChildById(UIPortalApplication.UI_MASK_WS_ID);
+
                 if (log.isTraceEnabled()) {
-                    log.trace("Showing registration form for OAuth registration");
+                    log.trace("Found user, which has been authenticated through OAuth. Username is " + oauthAuthenticatedUser.getUserName());
                 }
-                UIComponent uiRegisterOauth = uiMaskWS.createUIComponent(UIRegisterOAuth.class, null, null);
-                uiMaskWS.setUIComponent(uiRegisterOauth);
+
+                if (!uiMaskWS.isShow() || !uiMaskWS.getUIComponent().getClass().equals(UIRegisterOAuth.class)) {
+                    if (log.isTraceEnabled()) {
+                        log.trace("Showing registration form for OAuth registration");
+                    }
+                    UIComponent uiRegisterOauth = uiMaskWS.createUIComponent(UIRegisterOAuth.class, null, null);
+                    uiMaskWS.setUIComponent(uiRegisterOauth);
+                }
             }
         }
 
