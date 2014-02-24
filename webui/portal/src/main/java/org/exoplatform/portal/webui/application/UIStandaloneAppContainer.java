@@ -134,12 +134,22 @@ public class UIStandaloneAppContainer extends UIContainer {
                 AbstractTokenService tokenService = AbstractTokenService.getInstance(CookieTokenService.class);
                 tokenService.deleteToken(token);
             }
+            token = getOauthTokenCookie(req);
+            if (token != null) {
+                AbstractTokenService tokenService = AbstractTokenService.getInstance(CookieTokenService.class);
+                tokenService.deleteToken(token);
+            }
 
             LogoutControl.wantLogout();
             Cookie cookie = new Cookie(LoginServlet.COOKIE_NAME, "");
             cookie.setPath(req.getContextPath());
             cookie.setMaxAge(0);
             context.getResponse().addCookie(cookie);
+
+            Cookie oauthCookie = new Cookie(LoginServlet.OAUTH_COOKIE_NAME, "");
+            oauthCookie.setPath(req.getContextPath());
+            oauthCookie.setMaxAge(0);
+            context.getResponse().addCookie(oauthCookie);
 
             context.sendRedirect(req.getRequestURI());
         }
@@ -149,6 +159,17 @@ public class UIStandaloneAppContainer extends UIContainer {
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     if (LoginServlet.COOKIE_NAME.equals(cookie.getName())) {
+                        return cookie.getValue();
+                    }
+                }
+            }
+            return null;
+        }
+        private String getOauthTokenCookie(HttpServletRequest req) {
+            Cookie[] cookies = req.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if (LoginServlet.OAUTH_COOKIE_NAME.equals(cookie.getName())) {
                         return cookie.getValue();
                     }
                 }

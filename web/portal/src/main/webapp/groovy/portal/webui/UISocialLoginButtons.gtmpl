@@ -7,6 +7,9 @@
    String contextPath = prc.getRequestContextPath();
    String requestURI = prc.getRequestURI();
    OAuthProviderTypeRegistry registry = uicomponent.getApplicationComponent(OAuthProviderTypeRegistry.class);
+
+   def module1 = _ctx.getRequestContext().getJavascriptManager().require("SHARED/uiSocialLoginButtons", "uiSocialLoginButtons");
+   module1.addScripts("uiSocialLoginButtons.init();");
 %>
    <div class="SocialLoginButtons">
 <%

@@ -336,6 +336,11 @@ public class UIPortal extends UIContainer {
                 AbstractTokenService<GateInToken, String> tokenService = AbstractTokenService.getInstance(CookieTokenService.class);
                 tokenService.deleteToken(token);
             }
+            token = getOauthTokenCookie(req);
+            if(token != null) {
+                AbstractTokenService<GateInToken, String> tokenService = AbstractTokenService.getInstance(CookieTokenService.class);
+                tokenService.deleteToken(token);
+            }
 
             String portalName = prContext.getPortalOwner();
             NodeURL createURL = prContext.createURL(NodeURL.TYPE);
@@ -347,6 +352,11 @@ public class UIPortal extends UIContainer {
             cookie.setMaxAge(0);
             prContext.getResponse().addCookie(cookie);
 
+            Cookie oauthCookie = new Cookie(LoginServlet.OAUTH_COOKIE_NAME, "");
+            oauthCookie.setPath(req.getContextPath());
+            oauthCookie.setMaxAge(0);
+            prContext.getResponse().addCookie(oauthCookie);
+
             prContext.sendRedirect(createURL.toString());
         }
 
@@ -355,6 +365,18 @@ public class UIPortal extends UIContainer {
             if (cookies != null) {
                 for (Cookie cookie : cookies) {
                     if (LoginServlet.COOKIE_NAME.equals(cookie.getName())) {
+                        return cookie.getValue();
+                    }
+                }
+            }
+            return null;
+        }
+
+        private String getOauthTokenCookie(HttpServletRequest req) {
+            Cookie[] cookies = req.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if (LoginServlet.OAUTH_COOKIE_NAME.equals(cookie.getName())) {
                         return cookie.getValue();
                     }
                 }

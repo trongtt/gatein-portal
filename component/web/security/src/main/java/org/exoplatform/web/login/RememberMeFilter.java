@@ -31,6 +31,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.exoplatform.container.ExoContainer;
 import org.exoplatform.container.web.AbstractFilter;
+import org.exoplatform.portal.mop.user.UserPortal;
+import org.exoplatform.services.organization.OrganizationService;
+import org.exoplatform.services.organization.User;
+import org.exoplatform.services.organization.UserStatus;
+import org.exoplatform.services.organization.idm.UserImpl;
+import org.exoplatform.web.security.AuthenticationRegistry;
 import org.exoplatform.web.security.security.CookieTokenService;
 import org.gatein.wci.ServletContainer;
 import org.gatein.wci.ServletContainerFactory;
@@ -55,8 +61,7 @@ public class RememberMeFilter extends AbstractFilter {
             String token = LoginServlet.getRememberMeTokenCookie(req);
             if (token != null) {
                 ExoContainer container = getContainer();
-                CookieTokenService tokenservice = (CookieTokenService) container
-                        .getComponentInstanceOfType(CookieTokenService.class);
+                CookieTokenService tokenservice = container.getComponentInstanceOfType(CookieTokenService.class);
                 Credentials credentials = tokenservice.validateToken(token, false);
                 if (credentials != null) {
                     ServletContainer servletContainer = ServletContainerFactory.getServletContainer();
@@ -74,6 +79,42 @@ public class RememberMeFilter extends AbstractFilter {
                 cookie.setPath(req.getContextPath());
                 cookie.setMaxAge(0);
                 resp.addCookie(cookie);
+            }
+        }
+
+        //Process oauth rememberMe
+        if(req.getRemoteUser() == null) {
+            String token = LoginServlet.getOauthRememberMeTokenCookie(req);
+            if(token != null) {
+                ExoContainer container = getContainer();
+                CookieTokenService tokenService = container.getComponentInstanceOfType(CookieTokenService.class);
+                Credentials credentials = tokenService.validateToken(token, false);
+                AuthenticationRegistry authRegistry = container.getComponentInstanceOfType(AuthenticationRegistry.class);
+                OrganizationService orgService = container.getComponentInstanceOfType(OrganizationService.class);
+
+                if (credentials != null) {
+                    ServletContainer servletContainer = ServletContainerFactory.getServletContainer();
+                    try {
+                        String username = credentials.getUsername();
+
+                        User portalUser = orgService.getUserHandler().findUserByName(username, UserStatus.ENABLED);
+                        if(portalUser != null) {
+                            authRegistry.setAttributeOfClient(req, "_authenticatedPortalUserForJaas", portalUser);
+
+                            servletContainer.login(req, resp, credentials);
+                        }
+                    } catch (Exception e) {
+                        // Could not authenticate
+                    }
+                }
+
+                // Clear token cookie if we did not authenticate
+                if (req.getRemoteUser() == null) {
+                    Cookie cookie = new Cookie(LoginServlet.OAUTH_COOKIE_NAME, "");
+                    cookie.setPath(req.getContextPath());
+                    cookie.setMaxAge(0);
+                    resp.addCookie(cookie);
+                }
             }
         }
 
