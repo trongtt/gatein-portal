@@ -119,7 +119,7 @@ public class GadgetUtil {
                 .getComponentInstanceOfType(GadgetRegistryService.class);
         try {
             String data = "[{method:\"gadgets.metadata\", id:\"test\", params: {ids:[\"" + urlStr
-                    + "\"], container:\"default\", language:\"" + gadgetService.getLanguage() + "\", country:\""
+                    + "\"], container:\"" + PortalContainer.getCurrentPortalContainerName() + "\", language:\"" + gadgetService.getLanguage() + "\", country:\""
                     + gadgetService.getCountry() + "\", view:\"home\"}}]";
 
             // Send data
