@@ -41,7 +41,7 @@
       org.apache.shindig.gadgets.oauth2.OAuth2Module:
       org.apache.shindig.gadgets.oauth2.OAuth2MessageModule:
       org.apache.shindig.gadgets.oauth2.handler.OAuth2HandlerModule: 
-      org.apache.shindig.gadgets.oauth2.persistence.sample.OAuth2PersistenceModule:
+      org.exoplatform.portal.gadget.core.oauth2.OAuth2PersistenceModule:
       org.exoplatform.portal.gadget.core.GateInGadgetAdminModule
     </param-value>
   </context-param>

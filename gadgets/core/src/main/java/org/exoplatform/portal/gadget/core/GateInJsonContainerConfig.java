@@ -35,9 +35,8 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 /**
- * A fork of the class JsonContainerConfig, designed to override the loading of container.js
- *
- * User: Minh Hoang TO - hoang281283@gmail.com Date: 1/10/11 Time: 2:12 PM
+ * A fork of the class JsonContainerConfig, designed to override the loading of container.js User: Minh Hoang TO -
+ * hoang281283@gmail.com Date: 1/10/11 Time: 2:12 PM
  */
 @Singleton
 public class GateInJsonContainerConfig extends ExpressionContainerConfig {
@@ -48,10 +47,9 @@ public class GateInJsonContainerConfig extends ExpressionContainerConfig {
      */
     @Inject
     public GateInJsonContainerConfig(@Named("shindig.containers.default") String containers,
-            @Nullable @Named("shindig.host") String host,
-            @Nullable @Named("shindig.port") String port,
-            @Nullable @Named("shindig.contextroot") String contextRoot,
-            Expressions expressions) throws ContainerConfigException {
+            @Nullable @Named("shindig.host") String host, @Nullable @Named("shindig.port") String port,
+            @Nullable @Named("shindig.contextroot") String contextRoot, Expressions expressions)
+            throws ContainerConfigException {
         super(expressions);
         JsonContainerConfigLoader.getTransactionFromFile(containers, host, port, contextRoot, this).commit();
     }
@@ -64,10 +62,10 @@ public class GateInJsonContainerConfig extends ExpressionContainerConfig {
         Transaction transaction = newTransaction();
         Iterator<?> keys = json.keys();
         while (keys.hasNext()) {
-          JSONObject optJSONObject = json.optJSONObject((String) keys.next());
-          if (optJSONObject != null) {
-            transaction.addContainer(JsonContainerConfigLoader.parseJsonContainer(optJSONObject));
-          }
+            JSONObject optJSONObject = json.optJSONObject((String) keys.next());
+            if (optJSONObject != null) {
+                transaction.addContainer(JsonContainerConfigLoader.parseJsonContainer(optJSONObject));
+            }
         }
         transaction.commit();
     }

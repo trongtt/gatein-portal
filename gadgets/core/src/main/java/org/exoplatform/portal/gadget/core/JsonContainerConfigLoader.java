@@ -46,20 +46,24 @@ import com.google.common.collect.Maps;
 
 /**
  * This class is folked from org.apache.shindig.config.JsonContainerConfigLoader
- * because we can't extend this util class
- *
- *  rewrite loadResources method to allow container.js from eXoGadgetServer.war
+ * because we can't extend this util class rewrite loadResources method to allow
+ * container.js from eXoGadgetServer.war
  */
 public class JsonContainerConfigLoader {
 
-  private static final String classname = JsonContainerConfigLoader.class.getName();
-  private static final Logger LOG = Logger.getLogger(classname, MessageKeys.MESSAGES);
-  private static final Splitter CRLF_SPLITTER = Splitter.onPattern("[\r\n]+");
+  private static final String   classname      = JsonContainerConfigLoader.class.getName();
 
-  public static final char FILE_SEPARATOR = ',';
-  public static final String SERVER_PORT = "SERVER_PORT";
-  public static final String SERVER_HOST = "SERVER_HOST";
-  public static final String CONTEXT_ROOT = "CONTEXT_ROOT";
+  private static final Logger   LOG            = Logger.getLogger(classname, MessageKeys.MESSAGES);
+
+  private static final Splitter CRLF_SPLITTER  = Splitter.onPattern("[\r\n]+");
+
+  public static final char      FILE_SEPARATOR = ',';
+
+  public static final String    SERVER_PORT    = "SERVER_PORT";
+
+  public static final String    SERVER_HOST    = "SERVER_HOST";
+
+  public static final String    CONTEXT_ROOT   = "CONTEXT_ROOT";
 
   private JsonContainerConfigLoader() {
   }
@@ -69,37 +73,45 @@ public class JsonContainerConfigLoader {
    * resources to an existing configuration.
    *
    * @param containers The comma-separated list of files or resources to load
-   *        the container configurations from.
+   *          the container configurations from.
    * @param host The hostname where Shindig is running.
    * @param port The port number where Shindig is receiving requests.
    * @param contextRoot contextRoot where Shindig module is deployed
    * @param containerConfig The container configuration to add the contents of
-   *        the file to.
+   *          the file to.
    * @return A transaction to add the new containers to the configuration.
    * @throws ContainerConfigException If there was a problem reading the files.
    */
-  public static Transaction getTransactionFromFile(
-      String containers, String host, String port, String contextRoot,ContainerConfig containerConfig)
-      throws ContainerConfigException {
-    return addToTransactionFromFile(containers, host, port, contextRoot,containerConfig.newTransaction());
+  public static Transaction getTransactionFromFile(String containers,
+                                                   String host,
+                                                   String port,
+                                                   String contextRoot,
+                                                   ContainerConfig containerConfig) throws ContainerConfigException {
+    return addToTransactionFromFile(containers,
+                                    host,
+                                    port,
+                                    contextRoot,
+                                    containerConfig.newTransaction());
   }
 
   /**
    * Appends the contents of one or more files or resources to an transaction.
    *
    * @param containers The comma-separated list of files or resources to load
-   *        the container configurations from.
+   *          the container configurations from.
    * @param host The hostname where Shindig is running.
    * @param port The port number where Shindig is receiving requests.
    * @param transaction The transaction to add the contents of the file to.
    * @return The transaction, to allow chaining.
    * @throws ContainerConfigException If there was a problem reading the files.
    */
-  public static Transaction addToTransactionFromFile(
-      String containers, String host, String port, String contextRoot, Transaction transaction)
-      throws ContainerConfigException {
+  public static Transaction addToTransactionFromFile(String containers,
+                                                     String host,
+                                                     String port,
+                                                     String contextRoot,
+                                                     Transaction transaction) throws ContainerConfigException {
     List<Map<String, Object>> config = loadContainers(containers);
-    addHostAndPortToDefaultContainer(config, host, port,contextRoot);
+    addHostAndPortToDefaultContainer(config, host, port, contextRoot);
     addContainersToTransaction(transaction, config);
     return transaction;
   }
@@ -132,15 +144,18 @@ public class JsonContainerConfigLoader {
    * @param path
    * @throws ContainerConfigException
    */
-  private static List<Map<String, Object>> loadContainers(String path)
-      throws ContainerConfigException {
+  private static List<Map<String, Object>> loadContainers(String path) throws ContainerConfigException {
     List<Map<String, Object>> all = Lists.newArrayList();
     try {
       for (String location : Splitter.on(FILE_SEPARATOR).split(path)) {
         if (location.startsWith("res://")) {
           location = location.substring(6);
           if (LOG.isLoggable(Level.INFO)) {
-            LOG.logp(Level.INFO, classname, "loadContainers", MessageKeys.LOAD_RESOURCES_FROM, new Object[] {location});
+            LOG.logp(Level.INFO,
+                     classname,
+                     "loadContainers",
+                     MessageKeys.LOAD_RESOURCES_FROM,
+                     new Object[] { location });
           }
           if (path.endsWith(".txt")) {
             loadResources(CRLF_SPLITTER.split(ResourceLoader.getContent(location)), all);
@@ -149,10 +164,14 @@ public class JsonContainerConfigLoader {
           }
         } else {
           if (LOG.isLoggable(Level.INFO)) {
-            LOG.logp(Level.INFO, classname, "loadContainers", MessageKeys.LOAD_FILES_FROM, new Object[] {location});
+            LOG.logp(Level.INFO,
+                     classname,
+                     "loadContainers",
+                     MessageKeys.LOAD_FILES_FROM,
+                     new Object[] { location });
           }
           File file = new File(location);
-          loadFiles(new File[] {file}, all);
+          loadFiles(new File[] { file }, all);
         }
       }
 
@@ -163,28 +182,31 @@ public class JsonContainerConfigLoader {
   }
 
   /**
-   * Loads containers from directories recursively.
-   *
-   * Only files with a .js or .json extension will be loaded.
+   * Loads containers from directories recursively. Only files with a .js or
+   * .json extension will be loaded.
    *
    * @param files The files to examine.
    * @throws ContainerConfigException when IO exceptions occur
    */
-  private static void loadFiles(File[] files, List<Map<String, Object>> all)
-      throws ContainerConfigException {
+  private static void loadFiles(File[] files, List<Map<String, Object>> all) throws ContainerConfigException {
     for (File file : files) {
       try {
-        if (file == null) continue;
+        if (file == null)
+          continue;
         if (LOG.isLoggable(Level.INFO)) {
-          LOG.logp(Level.INFO, classname, "loadFiles", MessageKeys.READING_CONFIG, new Object[] {file.getName()});
+          LOG.logp(Level.INFO,
+                   classname,
+                   "loadFiles",
+                   MessageKeys.READING_CONFIG,
+                   new Object[] { file.getName() });
         }
         if (file.isDirectory()) {
           loadFiles(file.listFiles(), all);
         } else if (file.getName().toLowerCase(Locale.ENGLISH).endsWith(".js")
             || file.getName().toLowerCase(Locale.ENGLISH).endsWith(".json")) {
           if (!file.exists()) {
-            throw new ContainerConfigException(
-                "The file '" + file.getAbsolutePath() + "' doesn't exist.");
+            throw new ContainerConfigException("The file '" + file.getAbsolutePath()
+                + "' doesn't exist.");
           }
           all.add(loadFromString(ResourceLoader.getContent(file)));
         } else {
@@ -192,8 +214,8 @@ public class JsonContainerConfigLoader {
             LOG.finest(file.getAbsolutePath() + " doesn't seem to be a JS or JSON file.");
         }
       } catch (IOException e) {
-        throw new ContainerConfigException(
-            "The file '" + file.getAbsolutePath() + "' has errors", e);
+        throw new ContainerConfigException("The file '" + file.getAbsolutePath() + "' has errors",
+                                           e);
       }
     }
   }
@@ -204,20 +226,23 @@ public class JsonContainerConfigLoader {
    * @param files The base paths to look for container.xml
    * @throws ContainerConfigException when IO errors occur
    */
-  private static void loadResources(Iterable<String> files, List<Map<String, Object>> all)
-      throws ContainerConfigException {
+  private static void loadResources(Iterable<String> files, List<Map<String, Object>> all) throws ContainerConfigException {
     try {
       for (String entry : files) {
         if (LOG.isLoggable(Level.INFO)) {
-          LOG.logp(Level.INFO, classname, "loadResources", MessageKeys.READING_CONFIG, new Object[] {entry});
+          LOG.logp(Level.INFO,
+                   classname,
+                   "loadResources",
+                   MessageKeys.READING_CONFIG,
+                   new Object[] { entry });
         }
         GateInContainerConfigLoader currentLoader = GateInGuiceServletContextListener.getCurrentLoader();
         String content = currentLoader.loadContentAsString(entry, "UTF-8");
 
         if (content == null) {
-            content = ResourceLoader.getContent(entry);
-            if (content == null || content.length() == 0)
-                throw new IOException("The file " + entry + "is empty");
+          content = ResourceLoader.getContent(entry);
+          if (content == null || content.length() == 0)
+            throw new IOException("The file " + entry + "is empty");
         }
         all.add(loadFromString(content));
       }
@@ -237,7 +262,11 @@ public class JsonContainerConfigLoader {
       return jsonToMap(new JSONObject(json));
     } catch (JSONException e) {
       if (LOG.isLoggable(Level.WARNING)) {
-        LOG.logp(Level.WARNING, classname, "loadFromString", MessageKeys.READING_CONFIG, new Object[] {json});
+        LOG.logp(Level.WARNING,
+                 classname,
+                 "loadFromString",
+                 MessageKeys.READING_CONFIG,
+                 new Object[] { json });
       }
       throw new ContainerConfigException("Trouble parsing " + json, e);
     }
@@ -274,11 +303,12 @@ public class JsonContainerConfigLoader {
     Map<String, Object> values = new HashMap<String, Object>(json.length(), 1);
     for (String key : keys) {
       Object val = jsonToConfig(json.opt(key));
-      //If this is a string see if its a pointer to an external resource, and if so, load the resource
+      // If this is a string see if its a pointer to an external resource, and
+      // if so, load the resource
       if (val instanceof String) {
         String stringVal = (String) val;
-        if (stringVal.startsWith(ResourceLoader.RESOURCE_PREFIX) ||
-            stringVal.startsWith(ResourceLoader.FILE_PREFIX)) {
+        if (stringVal.startsWith(ResourceLoader.RESOURCE_PREFIX)
+            || stringVal.startsWith(ResourceLoader.FILE_PREFIX)) {
           try {
             val = IOUtils.toString(ResourceLoader.open(stringVal), "UTF-8");
           } catch (IOException e) {
@@ -293,8 +323,10 @@ public class JsonContainerConfigLoader {
     return Collections.unmodifiableMap(values);
   }
 
-  private static void addHostAndPortToDefaultContainer(
-      List<Map<String, Object>> config, String host, String port,String contextRoot) {
+  private static void addHostAndPortToDefaultContainer(List<Map<String, Object>> config,
+                                                       String host,
+                                                       String port,
+                                                       String contextRoot) {
     for (int i = 0, j = config.size(); i < j; ++i) {
       Map<String, Object> container = config.get(i);
       @SuppressWarnings("unchecked")
@@ -310,8 +342,8 @@ public class JsonContainerConfigLoader {
     }
   }
 
-  private static void addContainersToTransaction(
-      Transaction transaction, List<Map<String, Object>> config) {
+  private static void addContainersToTransaction(Transaction transaction,
+                                                 List<Map<String, Object>> config) {
     for (Map<String, Object> container : config) {
       transaction.addContainer(container);
     }
